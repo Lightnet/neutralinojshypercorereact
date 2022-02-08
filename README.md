@@ -61,6 +61,7 @@ npm run dev
 
 
 # Dev:
+```
 "nativeAllowList": [
     "app.*",
     "os.*",
@@ -73,6 +74,7 @@ npm run dev
     "debug.*",// for dev error on promise remove when added.
     "events.*"
   ],
+```
 
 # Links:
 - https://hypercore-protocol.org/

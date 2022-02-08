@@ -21,6 +21,13 @@ router.get('/drive', async function (req, res) {
 
   //res.send(JSON.stringify({dir:'/'}));
 })
+/*
+// https://github.com/hypercore-protocol/hyperdrive
+var stat = drive.stat('/hello.txt')
+stat.isDirectory()
+stat.isFile()
+stat.isSymlink()
+*/
 
 router.post('/drive', async function (req, res) {
   //console.log(getHyperDrive())

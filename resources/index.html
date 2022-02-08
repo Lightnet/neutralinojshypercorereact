@@ -14,8 +14,18 @@
     <!-- Neutralino.js client. This file is gitignored, 
         because `neu update` typically downloads it.
         Avoid copy-pasting it.
+        <script src="%PUBLIC_URL%/neutralino.js"></script>
+        <script src="http://localhost:3000\js\neutralino.js"></script>
         -->
+    <script>
+      //will not work here it need to init the "neutralino.js"
+      //console.log(NL_PUBLIC_URL)
+    </script>
     <script src="http://localhost:3000\js\neutralino.js"></script>
+    <script>
+      console.log(NL_PUBLIC_URL)
+      console.log(NL_TEST)
+    </script>
     <!-- Your app's source files -->
     <script src="js/main.js"></script>
     <script src="js/bundle.js"></script>

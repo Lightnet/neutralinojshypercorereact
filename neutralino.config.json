@@ -22,6 +22,8 @@
     "extensions.*"
   ],
   "globalVariables": {
+    "PUBLIC_URL":"/js",
+    "TEST": "Hello",
     "TEST1": "Hello",
     "TEST2": [
       2,

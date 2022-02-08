@@ -1,7 +1,14 @@
+/*
+  LICENSE: MIT
+  Created by: Lightnet
+*/
 
-import React from "react"
+import React, { useState } from "react"
 
 export default function ThemeButton(){
+
+  const [theme, setTheme] = useState('light');
+
 
   function clickToggle(){
     console.log('theme');
@@ -11,12 +18,13 @@ export default function ThemeButton(){
     if (currentTheme === "light") {
       targetTheme = "dark";
     }
+    setTheme(targetTheme);
 
     document.documentElement.setAttribute('data-theme', targetTheme)
     localStorage.setItem('theme', targetTheme);
   }
 
   return <button onClick={clickToggle}>
-    Theme
+    Theme: {theme}
   </button>
 }

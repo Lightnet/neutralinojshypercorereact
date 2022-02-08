@@ -9,26 +9,55 @@
 // s
 
 import React,{createRef, useEffect, useState} from "react";
+import { nanoid16 } from "../../lib/helper";
 import useFetch from '../hook/usefetch';
 //import ContentEditable from "react-contenteditable";
 import styles from './editor.module.css';
+
+var re = /(?:\.([^.]+))?$/;
+
+var textexts=[
+  'txt'
+  ,'md'
+  ,'js'
+  ,'xml'
+  ,'html'
+  ,'log'
+  ,'xhtml'
+  ,'json'
+];
+
+var imageexts=[
+  'png'
+  ,'gif'
+  ,'jpg'
+  ,'svg'
+];
+
+function checkExt(name){
+
+}
 
 export default function HyperDriveContent(){
 
   const [drive, setDrive] = useState('');
   const [dirname, setDirName] = useState('/');
+  const [createDirName, setCreateDirName] = useState('/');
   const [dirList, setDirList] = useState([]);
-  const [viewType, setViewType] = useState('dir');// dir, text, image
+  const [viewType, setViewType] = useState('dir');// dir, text, image, upload
 
   const [file,setFile] = useState('');
-  //const [textContent,setTextContent] = useState({html:""});
   const [textContent,setTextContent] = useState("");
   const contentEditable = createRef(null);
 
+  const [upload,setUpload] = useState();
+
+  //mount once
   useEffect(()=>{
     getDriveDir()
   },[])
 
+  //event for text editor set up
   useEffect(()=>{
     if(viewType=='texteditor'){
       contentEditable.current.innerText = textContent;
@@ -40,6 +69,10 @@ export default function HyperDriveContent(){
 
   function typeDirName(event){
     setDirName(event.target.value)
+  }
+
+  function typeCreateDirName(event){
+    setCreateDirName(event.target.value)
   }
 
   async function getDriveDir(){
@@ -179,6 +212,7 @@ export default function HyperDriveContent(){
 
   function clickEditNew(){
     setViewType('editortextnew');
+    setFile(nanoid16()+'.txt')
   }
 
   async function clickDeleteFile(filename){
@@ -199,12 +233,11 @@ export default function HyperDriveContent(){
     getDriveDir();
   }
 
-
   async function clickMakeDir(){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
-        dirname:dirname
+        dirname:createDirName
         , mode:'mkdir'
       })
     });
@@ -219,7 +252,7 @@ export default function HyperDriveContent(){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
-        dirname:dirname
+        dirname:createDirName
         , mode:'rmdir'
       })
     });
@@ -230,34 +263,44 @@ export default function HyperDriveContent(){
     }
   }
 
+  function clickUpload(){
+    setViewType('upload');
+  }
+
+  function clickDeleteDir(){
+    
+  }
+
   function viewMode(){
     if(viewType=='dir'){
       return dirList.map((item)=>{
-        var ext = item.substr(item.lastIndexOf('.') + 1);
+
+        var ext = re.exec(item)[1];
+        //var ext = item.substr(item.lastIndexOf('.') + 1);
         let bedit = <></>;
-        if(ext== 'txt'){
-          bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
+        let bdelete = <></>;
+        if(ext){
+          if(ext== 'txt'){
+            bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
+            bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
+          }
+        }else{
+
         }
-        //console.log(ext);
+        
+        console.log("NAME:",item)
+        console.log(ext);
         return <div key={item}>
-            <label> {item}</label> {bedit} <button onClick={()=>clickDeleteFile(item)}> Delete </button>
+            <label> {item}</label> {bedit} {bdelete}
           </div>
       })
     }else if(viewType=='texteditor'){
-      {
-        //{textContent}
-      }
+
       return <>
         <div
           ref={contentEditable}
           className={styles.textEditor}
-          //html={textContent}
-          //disabled={false}
-          //onChange={typeTextContent}
-          //onBlur={e => {console.log(e.currentTarget.textContent);}} 
           suppressContentEditableWarning={true}
-          //dangerouslySetInnerHTML={{ __html: textContent }}
-          //dangerouslySetInnerHTML={{ __html: textContent }}
           onInput={typeTextContent}
           contentEditable={true}
           >
@@ -268,13 +311,11 @@ export default function HyperDriveContent(){
       </>
     }else if(viewType=='editortextnew'){
       return <>
-        <label> File Name: </label> <input value={file} onChange={typeFile} /><br />
+        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} /><br />
         <label> Text Content: </label> <br />
         <div 
           ref={contentEditable}
           className={styles.textEditor} 
-          //value={textContent} 
-          //onChange={typeTextContent} 
           suppressContentEditableWarning={true}
           //dangerouslySetInnerHTML={{ __html: textContent }}
           contentEditable={true}
@@ -286,8 +327,15 @@ export default function HyperDriveContent(){
       </>
     }else if(viewType=='image'){
       return <>
-        <label> File Name: </label> <input value={file} onChange={typeFile} /><br />
+        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} /><br />
         <button> Delete </button>
+        <button onClick={clickEditCancel}> Cancel </button>
+      </>
+    }else if(viewType=='upload'){
+      return <>
+        <label> File Name: </label>
+        <input size="64" value={file} onChange={typeFile} /><br />
+        <button> Upload </button>
         <button onClick={clickEditCancel}> Cancel </button>
       </>
     }
@@ -299,17 +347,18 @@ export default function HyperDriveContent(){
       <button onClick={getDriveDir}> Refresh </button>
       <button onClick={createDrive}> Create </button>
       <button onClick={getDrive}> Get </button>
-      <input value={drive} onChange={typeDrive}/>
+      <input size="64" value={drive} onChange={typeDrive}/>
     </div>
     <div>
       <button onClick={clickEditNew}> New Text File </button>
+      <button onClick={clickUpload}> Upload </button>
       <button onClick={clickMakeDir}> mkdir </button>
       <button onClick={clickRemoveDir}> rmdir </button>
-      <input value={dirname} onChange={typeDirName}></input>
+      <input size="64" value={createDirName} onChange={typeCreateDirName}></input>
     </div>
     
     <div>
-      <label> Directory </label>
+      <label> Directory </label><input size="64" value={dirname} onChange={typeDirName}/>
     </div>
     <div>
       {viewMode()}

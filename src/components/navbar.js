@@ -12,7 +12,7 @@ export default function NavBar(){
     <Link to="/" > Home </Link><span> | </span>
     <Link to="/about" > About </Link><span> | </span>
     <Link to="/drive" > Drive </Link><span> | </span>
-    <Link to="/texteditor" > texteditor </Link><span> | </span>
-    <Link to="/upload" > upload </Link><span> | </span>
+    <Link to="/texteditor" > Text Editor </Link><span> | </span>
+    <Link to="/upload" > Upload </Link><span> | </span>
   </div>
 }
