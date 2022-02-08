@@ -135,7 +135,8 @@ export default function HyperDriveContent(){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
-         file:filename
+          dirname:dirname
+        , file:filename
         , mode:'edit'
       })
     });

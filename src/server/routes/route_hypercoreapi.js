@@ -30,12 +30,7 @@ stat.isSymlink()
 */
 
 router.post('/drive', async function (req, res) {
-  //console.log(getHyperDrive())
-  //await getHyperClient();
   const drive = await getHyperDrive();
-  //await drive.promises.writeFile('/hello.txt', 'world')
-  //const data = await drive.promises.readFile('/hello.txt', 'utf-8')
-
   let data = req.body;
   console.log(data);
   // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
@@ -62,18 +57,20 @@ router.post('/drive', async function (req, res) {
   }
 
   if(data.mode=='edit'){
-    const content = await drive.promises.readFile('/'+data.file, 'utf-8')
+    let filepath = path.join(data.dirname,data.file)
+    filepath = filepath.replaceAll("\\" , "/");
+    const content = await drive.promises.readFile(filepath, 'utf-8')
     return res.json({file:data.file,content:content});
   }
 
   if(data.mode=='save'){
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
-    var test = path.join("/test",data.file)
-    console.log("test...");
-    console.log(test);
-
-
-    await drive.promises.writeFile('/'+data.file, data.content)
+    //var test = path.join("/test",data.file)
+    //console.log("test...");
+    //console.log(test);
+    let filepath = path.join(data.dirname,data.file)
+    filepath = filepath.replaceAll("\\" , "/");
+    await drive.promises.writeFile(filepath, data.content)
     return res.json({message:'save'});
   }
 
@@ -81,14 +78,11 @@ router.post('/drive', async function (req, res) {
     console.log(data.dirname)
     console.log(data.file)
     try{
-      
       if(isEmpty(data.file)||isEmpty(data.dirname)){
         return res.json({error:'file name empty'});
       }
-      var filepath = path.join(data.dirname,data.file)
+      let filepath = path.join(data.dirname,data.file)
       filepath = filepath.replaceAll("\\" , "/");
-      
-      
       await drive.promises.writeFile(filepath, data.content)
       
       return res.json({message:'create'});
@@ -167,14 +161,14 @@ router.put('/drive', async function (req, res) {
 router.delete('/drive', async function (req, res) {
   const drive = await getHyperDrive();
   let data = req.body;
-  console.log('delete....')
+  //console.log('delete....')
   try{
     let status = await drive.promises.unlink('/'+data.file);
     console.log(status);
   }catch(e){
-    console.log("e.......");
+    //console.log("e.......");
     console.log(e.message);
-    console.log("e.......");
+    //console.log("e.......");
     return res.json({error:e.message});
   }
   
@@ -190,16 +184,15 @@ router.post('/driveupload', upload.single('File'),async function (req, res) {
     console.log('Error path dir')
     res.json({error:'Error Path'});
   }
-  console.log("dirname:",dirname)
-  console.log(req.body);
-  console.log(req.file);
-  console.log('test////')
+  //console.log("dirname:",dirname)
+  //console.log(req.body);
+  //console.log(req.file);
+  //console.log('test////')
   //console.log(req.files);
 
   try{
-    var filepath = path.join(dirname,req.file.originalname)
+    let filepath = path.join(dirname,req.file.originalname)
     filepath = filepath.replaceAll("\\" , "/");
-
     await drive.promises.writeFile(filepath, req.file.buffer)
   }catch(e){
     console.log(e.message)
@@ -207,6 +200,52 @@ router.post('/driveupload', upload.single('File'),async function (req, res) {
   }
 
   res.json({message:'uploaded'});
+})
+
+/*
+router.get('/drive/:name',async function (req, res) {
+  
+  const drive = await getHyperDrive();
+  console.log(req.params)
+  console.log(req.body)
+  let name = req.name
+  console.log(name)
+  console.log('Request URL:', req.originalUrl)
+
+  //const content = await drive.promises.readFile(filepath, 'utf-8')
+  res.send('Hello ' + req.name + '!');
+})
+*/
+
+var re = /(?:\.([^.]+))?$/;
+
+router.get('/drive/*',async function (req, res) {
+  
+  const drive = await getHyperDrive();
+  console.log(req.params)
+  console.log('Request URL:', req.originalUrl)
+
+  var ext = re.exec(req.params[0])[1];
+  if(ext){
+    console.log('test:',ext);
+    console.log('test:',req.params[0]);
+    const content = await drive.promises.readFile(req.params[0], 'utf-8')
+    //res.type('txt')
+    //res.append('Content-Type', 'text/html; charset=UTF-8');
+    //res.append('Content-Type', 'application/javascript; charset=UTF-8');
+    //res.type('txt')
+    //res.header("Content-Type", "text/cache-manifest");
+    //res.setHeader('Content-type', 'txt');//work
+    res.setHeader('content-type', 'text/plain');//works
+    return res.end(content);
+    //return res.send(content);
+  }
+
+  const list = await drive.promises.readdir('/');
+  res.json({dir:'/',list:list});
+
+  //const content = await drive.promises.readFile(filepath, 'utf-8')
+  //res.send('Hello ' + req.name + '!');
 })
 
 

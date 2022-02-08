@@ -34,6 +34,7 @@
 - Hyperdrive (file management)
   - local (default without the key for general access, configs and save drive keys)
     - create file (added)
+    - rename file (not added)
     - upload (added)
     - delete file (added)
     - create folder (added)
@@ -50,6 +51,22 @@
 
 - express
   - api for drive access, upload, download and other functions calls.
+
+# Layout:
+Home | About | Drive | Text Editor | Upload
+
+
+## Drive:
+
+```
+Refresh (reload current dirname) | Create (not added) | Get (drive id) |
+New Text File | Upload | mkdir | rmdir | dir (createDirName)
+Directory | Input (dirname / Enter )
+
+Dir List Map
+
+```
+
 
 # Set Up:
 
