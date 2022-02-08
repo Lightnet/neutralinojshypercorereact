@@ -6,20 +6,20 @@
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 // https://www.thatsoftwaredude.com/content/8912/create-a-basic-text-editor-in-javascript
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-var express = require('express');
+const express = require('express');
 const { isEmpty } = require('../../lib/helperserver');
-var router = express.Router()
+const router = express.Router()
+const path = require('path');
+const multer  = require('multer')
+const upload = multer()
 
 const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient');
 
 // define the about route
 router.get('/drive', async function (req, res) {
-  
   const drive = await getHyperDrive();
   const list = await drive.promises.readdir('/');
   res.json({dir:'/',list:list});
-
-  //res.send(JSON.stringify({dir:'/'}));
 })
 /*
 // https://github.com/hypercore-protocol/hyperdrive
@@ -38,6 +38,29 @@ router.post('/drive', async function (req, res) {
 
   let data = req.body;
   console.log(data);
+  // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
+  if(data.mode=='dir'){
+    try{
+      const stat = await drive.promises.stat(data.dirname)
+      console.log(stat);
+      //console.log("stat.isDirectory()")
+      //console.log(stat.isDirectory())
+      //console.log(stat.isFile())
+      //console.log(stat.isSymlink())
+      if(stat.isDirectory() == true){
+        console.log("Found Directory()");
+        const list = await drive.promises.readdir(data.dirname);
+        console.log(list);
+        return res.json({dir:data.dirname,list:list});
+      }
+      return res.json({error:data.dirname + 'Not Found!'});
+    }catch(e){
+      //console.log(e);
+      console.log(e.message);
+      return res.json({error:e.message});  
+    }
+  }
+
   if(data.mode=='edit'){
     const content = await drive.promises.readFile('/'+data.file, 'utf-8')
     return res.json({file:data.file,content:content});
@@ -45,17 +68,35 @@ router.post('/drive', async function (req, res) {
 
   if(data.mode=='save'){
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
+    var test = path.join("/test",data.file)
+    console.log("test...");
+    console.log(test);
+
+
     await drive.promises.writeFile('/'+data.file, data.content)
     return res.json({message:'save'});
   }
 
   if(data.mode=='create'){
-    //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
-    if(isEmpty(data.file)){
-      return res.json({error:'file name empty'});
+    console.log(data.dirname)
+    console.log(data.file)
+    try{
+      
+      if(isEmpty(data.file)||isEmpty(data.dirname)){
+        return res.json({error:'file name empty'});
+      }
+      var filepath = path.join(data.dirname,data.file)
+      filepath = filepath.replaceAll("\\" , "/");
+      
+      
+      await drive.promises.writeFile(filepath, data.content)
+      
+      return res.json({message:'create'});
+    }catch(e){
+      console.log("e.message")
+      console.log(e.message)
+      return res.json({error:e.message});
     }
-    await drive.promises.writeFile('/'+data.file, data.content)
-    return res.json({message:'create'});
   }
 
   if(data.mode=='mkdir'){//make dir
@@ -140,6 +181,33 @@ router.delete('/drive', async function (req, res) {
   res.json({meesage:'delete'});
 })
 
+router.post('/driveupload', upload.single('File'),async function (req, res) {
+  
+  const drive = await getHyperDrive();
+  console.log('test////')
+  let {dirname} = req.body;
+  if(!dirname){
+    console.log('Error path dir')
+    res.json({error:'Error Path'});
+  }
+  console.log("dirname:",dirname)
+  console.log(req.body);
+  console.log(req.file);
+  console.log('test////')
+  //console.log(req.files);
+
+  try{
+    var filepath = path.join(dirname,req.file.originalname)
+    filepath = filepath.replaceAll("\\" , "/");
+
+    await drive.promises.writeFile(filepath, req.file.buffer)
+  }catch(e){
+    console.log(e.message)
+    res.json({error:e.message});
+  }
+
+  res.json({message:'uploaded'});
+})
 
 
 module.exports = router;

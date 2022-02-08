@@ -34,15 +34,18 @@
 - Hyperdrive (file management)
   - local (default without the key for general access, configs and save drive keys)
     - create file (added)
-    - upload (not added)
+    - upload (added)
     - delete file (added)
     - create folder (added)
     - delete folder (added)
+      - delete folder sub (not added)
+    - copy file (not added)
+    - copy files (not added)
 
   - create drive key (not added)
   - list drive key (not added)
 - Hyperbee (database) (not added)
-  - key  (not added)
+  - key (not added)
   - sub key (not added)
 
 - express

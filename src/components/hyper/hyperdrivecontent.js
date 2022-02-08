@@ -50,7 +50,8 @@ export default function HyperDriveContent(){
   const [textContent,setTextContent] = useState("");
   const contentEditable = createRef(null);
 
-  const [upload,setUpload] = useState();
+  const [selectedFile, setSelectedFile] = useState();
+  const [isSelected,setIsSelected] = useState(false);
 
   //mount once
   useEffect(()=>{
@@ -76,11 +77,19 @@ export default function HyperDriveContent(){
   }
 
   async function getDriveDir(){
-    let data = await useFetch('http://localhost/drive');
-    //console.log(data);
-    if(data.list){
-      setDirList(data.list);
-      setViewType('dir');
+    if(dirname=='/'){
+      let data = await useFetch('http://localhost/drive');
+      //console.log(data);
+      if(data.error){
+        console.log('Fetch Error get dir list.')
+        return;
+      }
+      if(data.list){
+        setDirList(data.list);
+        setViewType('dir');
+      }
+    }else{
+      DriveDirList(dirname)
     }
   }
 
@@ -151,7 +160,8 @@ export default function HyperDriveContent(){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
-         file:file
+          dirname:dirname
+        , file:file
         , content:contentEditable.current.innerText
         , mode:'save'
       })
@@ -186,7 +196,8 @@ export default function HyperDriveContent(){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
-         file:file
+          dirname:dirname
+        , file:file
         , content:contentEditable.current.innerText
         , mode:'create'
       })
@@ -219,7 +230,8 @@ export default function HyperDriveContent(){
     let data = await useFetch('http://localhost/drive',{
         method:'DELETE'
       , body:JSON.stringify({
-         file:filename
+          dirname:dirname
+        , file:filename
         , mode:'delete'
       })
     });
@@ -271,6 +283,32 @@ export default function HyperDriveContent(){
     
   }
 
+  function changeFileSelect(event){
+    setSelectedFile(event.target.files[0]);
+		setIsSelected(true);
+  }
+
+  function clickUploadHandle(){
+    console.log('upload');
+    const formData = new FormData();
+    formData.append('File', selectedFile);
+    formData.append('dirname', dirname);
+    fetch(
+			'http://localhost/driveupload',
+			{
+				method: 'POST',
+				body: formData,
+			}
+		)
+			.then((response) => response.json())
+			.then((result) => {
+				console.log('Success:', result);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+  }
+
   function viewMode(){
     if(viewType=='dir'){
       return dirList.map((item)=>{
@@ -288,8 +326,8 @@ export default function HyperDriveContent(){
 
         }
         
-        console.log("NAME:",item)
-        console.log(ext);
+        //console.log("NAME:",item)
+        //console.log(ext);
         return <div key={item}>
             <label> {item}</label> {bedit} {bdelete}
           </div>
@@ -334,12 +372,38 @@ export default function HyperDriveContent(){
     }else if(viewType=='upload'){
       return <>
         <label> File Name: </label>
-        <input size="64" value={file} onChange={typeFile} /><br />
-        <button> Upload </button>
+        <input type="file" name="file" onChange={changeFileSelect} />
+        <button onClick={clickUploadHandle}> Upload </button>
         <button onClick={clickEditCancel}> Cancel </button>
       </>
     }
     return <></>
+  }
+
+  async function DriveDirList(name){
+    let data = await useFetch('http://localhost/drive',{
+        method:'POST'
+      , body:JSON.stringify({
+          dirname:name
+        , mode:'dir'
+      })
+    });
+    console.log(data);
+    if(data.error){
+      console.log('Fetch Error get content data.')
+      setDirList([]);
+      return;
+    }
+    if(data.list){
+      setDirList(data.list);
+    }
+  }
+
+  function typeDirEnter(event){
+    console.log(event.code);
+    if(event.code=='Enter'){
+      DriveDirList(event.target.value);
+    }
   }
   
   return <div>
@@ -358,7 +422,7 @@ export default function HyperDriveContent(){
     </div>
     
     <div>
-      <label> Directory </label><input size="64" value={dirname} onChange={typeDirName}/>
+      <label> Directory </label><input size="64" value={dirname} onChange={typeDirName} onKeyUp={typeDirEnter} />
     </div>
     <div>
       {viewMode()}
