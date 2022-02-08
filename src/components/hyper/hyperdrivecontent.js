@@ -1,9 +1,12 @@
 /*
   LICENSE: MIT
   Created by: Lightnet
+
 */
 
+// https://github.com/neutralinojs/neutralinojs/blob/main/server/router.cpp
 // https://stackoverflow.com/questions/680929/how-to-extract-extension-from-filename-string-in-javascript/680982
+// s
 
 import React,{createRef, useEffect, useState} from "react";
 import useFetch from '../hook/usefetch';
@@ -13,6 +16,7 @@ import styles from './editor.module.css';
 export default function HyperDriveContent(){
 
   const [drive, setDrive] = useState('');
+  const [dirname, setDirName] = useState('/');
   const [dirList, setDirList] = useState([]);
   const [viewType, setViewType] = useState('dir');// dir, text, image
 
@@ -34,9 +38,13 @@ export default function HyperDriveContent(){
     }
   },[viewType])
 
+  function typeDirName(event){
+    setDirName(event.target.value)
+  }
+
   async function getDriveDir(){
     let data = await useFetch('http://localhost/drive');
-    console.log(data);
+    //console.log(data);
     if(data.list){
       setDirList(data.list);
       setViewType('dir');
@@ -45,8 +53,7 @@ export default function HyperDriveContent(){
 
   function typeTextContent(event){
     //console.log(event.target.innerText);
-    console.log(event.target.textContent);
-
+    //console.log(event.target.textContent);
     //setTextContent(event.target.textContent);
     //setTextContent(event.target.innerText);
     //setTextContent(event.currentTarget.textContent);
@@ -57,7 +64,21 @@ export default function HyperDriveContent(){
   }
 
   async function getDrive(){
-
+    let data = await useFetch('http://localhost/drive',{
+        method:'POST'
+      , body:JSON.stringify({
+        mode:'drivekey'
+      })
+    });
+    console.log(data);
+    if(data.error){
+      console.log('Fetch Error get content data.')
+      return;
+    }
+    if(data.api=='drivekey'){
+      setDrive(data.key);
+      return;
+    }
   }
 
   async function createDrive(){
@@ -66,17 +87,6 @@ export default function HyperDriveContent(){
 
   function typeDrive(event){
     setDrive(event.target.value)
-  }
-
-  async function createTxt(){
-    let data = await useFetch('http://localhost/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-          file:file
-        , mode:'create'
-      })
-    });
-    console.log(data);
   }
 
   async function clickEdit(filename){
@@ -105,7 +115,6 @@ export default function HyperDriveContent(){
     //console.log(contentEditable.current.textContent);
     console.log(contentEditable.current.innerHTML);
 
-
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
       , body:JSON.stringify({
@@ -119,17 +128,21 @@ export default function HyperDriveContent(){
       console.log('Fetch Error get content data.')
       return;
     }
+
+    setViewType('dir');
+    getDriveDir();
+
     //if(data.content){
       //setFile(filename);
       //setTextContent(data.content);
       //setViewType('texteditor');
     //}
   }
-
+// https://stackoverflow.com/questions/42300528/javascript-phps-substr-alternative-on-javascript
   async function clickTextCreate(){
 
     let filestr = file;
-    var ext = filestr.substr(filestr.lastIndexOf('.') + 1);
+    var ext = filestr.substring(filestr.lastIndexOf('.') + 1);
     if(ext=='txt'){
 
     }else{
@@ -150,6 +163,9 @@ export default function HyperDriveContent(){
       console.log('Fetch Error get content data.')
       return;
     }
+
+    setViewType('dir');
+    getDriveDir();
     //if(data.content){
       //setFile(filename);
       //setTextContent(data.content);
@@ -165,8 +181,53 @@ export default function HyperDriveContent(){
     setViewType('editortextnew');
   }
 
-  function clickEditTest(){
-    contentEditable.current.innerText = 'test\ntest';
+  async function clickDeleteFile(filename){
+    let data = await useFetch('http://localhost/drive',{
+        method:'DELETE'
+      , body:JSON.stringify({
+         file:filename
+        , mode:'delete'
+      })
+    });
+    console.log(data);
+    if(data.error){
+      console.log('Fetch Error get content data.')
+      return;
+    }
+
+    setViewType('dir')
+    getDriveDir();
+  }
+
+
+  async function clickMakeDir(){
+    let data = await useFetch('http://localhost/drive',{
+        method:'POST'
+      , body:JSON.stringify({
+        dirname:dirname
+        , mode:'mkdir'
+      })
+    });
+    console.log(data);
+    if(data.error){
+      console.log('Fetch Error get content data.')
+      return;
+    }
+  }
+
+  async function clickRemoveDir(){
+    let data = await useFetch('http://localhost/drive',{
+        method:'POST'
+      , body:JSON.stringify({
+        dirname:dirname
+        , mode:'rmdir'
+      })
+    });
+    console.log(data);
+    if(data.error){
+      console.log('Fetch Error get content data.')
+      return;
+    }
   }
 
   function viewMode(){
@@ -177,9 +238,9 @@ export default function HyperDriveContent(){
         if(ext== 'txt'){
           bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
         }
-        console.log(ext);
+        //console.log(ext);
         return <div key={item}>
-            <label> {item}</label> {bedit}
+            <label> {item}</label> {bedit} <button onClick={()=>clickDeleteFile(item)}> Delete </button>
           </div>
       })
     }else if(viewType=='texteditor'){
@@ -204,7 +265,6 @@ export default function HyperDriveContent(){
           </div><br />
         <button onClick={clickTextSave}> Save </button>
         <button onClick={clickEditCancel}> Cancel </button>
-        <button onClick={clickEditTest}> test </button>
       </>
     }else if(viewType=='editortextnew'){
       return <>
@@ -223,7 +283,6 @@ export default function HyperDriveContent(){
         </div><br />
         <button onClick={clickTextCreate}> Save </button>
         <button onClick={clickEditCancel}> Cancel </button>
-        <button onClick={clickEditTest}> test </button>
       </>
     }else if(viewType=='image'){
       return <>
@@ -234,16 +293,24 @@ export default function HyperDriveContent(){
     }
     return <></>
   }
-
+  
   return <div>
-    <button onClick={getDriveDir}> Refresh </button>
-    <button onClick={createDrive}> Create </button>
-    <button onClick={getDrive}> Get </button>
-    <input value={drive} onChange={typeDrive}/>
-
-    <button onClick={createTxt}> CreateTxt </button>
-    <button onClick={clickEditNew}> New Text </button>
-
+    <div>
+      <button onClick={getDriveDir}> Refresh </button>
+      <button onClick={createDrive}> Create </button>
+      <button onClick={getDrive}> Get </button>
+      <input value={drive} onChange={typeDrive}/>
+    </div>
+    <div>
+      <button onClick={clickEditNew}> New Text File </button>
+      <button onClick={clickMakeDir}> mkdir </button>
+      <button onClick={clickRemoveDir}> rmdir </button>
+      <input value={dirname} onChange={typeDirName}></input>
+    </div>
+    
+    <div>
+      <label> Directory </label>
+    </div>
     <div>
       {viewMode()}
     </div>

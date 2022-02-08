@@ -30,6 +30,8 @@ export default async function useFetch(url,args){
 
   try{
     let response = await fetch(url, args);
+    //console.log(response)
+
     if (!response.ok) {
       //const message = 'Error with Status Code: ' + response.status;
       //throw new Error(message);
@@ -37,6 +39,8 @@ export default async function useFetch(url,args){
       return {error:'SERVER FETCH ERROR'};// check if the server error
     }
     let data = await response.json();
+    //console.log("data")
+    //console.log(data)
     return data;
   }catch(e){
     console.log("FETCH ERROR");

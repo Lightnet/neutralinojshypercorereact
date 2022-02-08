@@ -5,7 +5,7 @@
 
 var express = require('express')
 var router = express.Router()
-var routeHyperDrive = require('./routes/route_hyperclient');
+var routeHypercoreapi = require('./routes/route_hypercoreapi');
 var routeUpload = require('./routes/route_upload');
 
 // middleware that is specific to this router
@@ -24,7 +24,7 @@ router.get('/test', function (req, res) {
   res.send(JSON.stringify({meesage:'test'}));
 })
 
-router.use('/',routeHyperDrive);
+router.use('/',routeHypercoreapi);
 router.use('/',routeUpload);
 
 module.exports = router;
