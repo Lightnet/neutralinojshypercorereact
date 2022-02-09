@@ -247,6 +247,16 @@ router.get('/drive/*',async function (req, res) {
   //const content = await drive.promises.readFile(filepath, 'utf-8')
   //res.send('Hello ' + req.name + '!');
 })
+//https://stackoverflow.com/questions/67767954/set-the-filename-for-file-download-with-use-of-fetch
+router.get('/download/*',async function (req, res) {
+  const drive = await getHyperDrive();
+  var ext = re.exec(req.params[0])[1];
 
+  if(ext){
+    const content = await drive.promises.readFile(req.params[0], 'utf-8')
+    res.setHeader('content-type', 'text/plain');//works
+    return res.end(content);
+  }
+})
 
 module.exports = router;

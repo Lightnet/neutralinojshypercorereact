@@ -318,9 +318,11 @@ export default function HyperDriveContent(){
         //var ext = item.substr(item.lastIndexOf('.') + 1);
         let bedit = <></>;
         let bdelete = <></>;
+        let bdowload = <></>;
         if(ext){
           if(ext== 'txt'){
             bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
+            bdowload=<button onClick={()=>clickDownload(item)}>Download</button>
             bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
           }
         }else{
@@ -330,7 +332,7 @@ export default function HyperDriveContent(){
         //console.log("NAME:",item)
         //console.log(ext);
         return <div key={item}>
-            <label> {item}</label> {bedit} {bdelete}
+            <label> {item}</label> {bdowload} {bedit} {bdelete}
           </div>
       })
     }else if(viewType=='texteditor'){
@@ -405,6 +407,71 @@ export default function HyperDriveContent(){
     if(event.code=='Enter'){
       DriveDirList(event.target.value);
     }
+  }
+  // https://www.codegrepper.com/code-examples/javascript/download+file+from+url+in+react
+  // https://javascript.plainenglish.io/downloading-files-in-react-native-with-rnfetchblob-f78b18b46a36
+  async function clickDownloadTest(){
+    let fileURL = 'test.txt';
+    fetch('http://localhost/download/' + fileURL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    })
+    .then((response) => response.blob())
+    .then((blob) => {
+      // Create blob link to download
+      const url = window.URL.createObjectURL(
+        new Blob([blob]),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        fileURL,
+      );
+
+      // Append to html link element page
+      document.body.appendChild(link);
+
+      // Start download
+      link.click();
+
+      // Clean up and remove the link
+      link.parentNode.removeChild(link);
+    });
+  }
+
+  async function clickDownload(filename){
+    let fileURL = dirname + filename;
+    fetch('http://localhost/download' + fileURL, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+    })
+    .then((response) => response.blob())
+    .then((blob) => {
+      // Create blob link to download
+      const url = window.URL.createObjectURL(
+        new Blob([blob]),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        filename,
+      );
+
+      // Append to html link element page
+      document.body.appendChild(link);
+
+      // Start download
+      link.click();
+
+      // Clean up and remove the link
+      link.parentNode.removeChild(link);
+    });
   }
   
   return <div>
