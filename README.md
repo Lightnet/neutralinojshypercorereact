@@ -36,6 +36,7 @@
     - create file (added)
     - rename file (not added)
     - upload (added)
+    - download (added)
     - delete file (added)
     - create folder (added)
     - delete folder (added)
@@ -66,6 +67,16 @@ Directory | Input (dirname / Enter )
 Dir List Map
 
 ```
+
+### Drive Urls:(work in progress)
+```
+http://localhost/hyper/filename.txt <-local drive
+http://localhost/hyper/testfolder/filename.txt <-local drive with folder
+
+http://localhost/hyper/000000.../filename.txt <- key drive with file
+```
+  It need to check if there key or file that be loaded. One for access to local drive and other is key drive
+
 
 
 # Set Up:

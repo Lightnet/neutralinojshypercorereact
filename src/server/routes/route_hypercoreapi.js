@@ -13,6 +13,7 @@ const path = require('path');
 const multer  = require('multer')
 const upload = multer()
 const mime = require('mime');
+const Hyperdrive = require('hyperdrive');
 
 const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient');
 
@@ -220,37 +221,82 @@ router.get('/drive/:name',async function (req, res) {
 
 var re = /(?:\.([^.]+))?$/;
 
-router.get('/drive/*',async function (req, res) {
+router.get('/drive/:key/*',async function (req, res) {
   
   const drive = await getHyperDrive();
   console.log(req.params)
-  console.log('Request URL:', req.originalUrl)
+  //console.log('Request URL:', req.originalUrl)
+
+  console.log("FILE?", req.params[0])
+  console.log("KEY?", req.params.key)
+  if(req.params.key.length == 64){
+    console.log('ok')
+  }else{
+    console.log('fail')
+    res.send('Invalid key char 64='+req.params.key.length);
+    return;
+  }
 
   var ext = re.exec(req.params[0])[1];
-  if(ext){
-    console.log('test:',ext);
-    console.log('test:',req.params[0]);
+  if(ext){//check if ext file exist
+    //need to check file exist
+    //need to check for dir list here
+
+    console.log("HERE EXT?")
+
+    const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
+    //const list = await drive.promises.readdir("/");
     const content = await drive.promises.readFile(req.params[0], 'utf-8')
-    //res.type('txt')
-    //res.append('Content-Type', 'text/html; charset=UTF-8');
-    //res.append('Content-Type', 'application/javascript; charset=UTF-8');
-    //res.type('txt')
-    //res.header("Content-Type", "text/cache-manifest");
-    //res.setHeader('Content-type', 'txt');//work
-    //res.setHeader('content-type', 'text/plain');//works
     const mimetype = mime.lookup(req.params[0]);
+    drive.close();
+    console.log(mimetype)
+    res.setHeader('Content-type', mimetype);
+    res.end(content);
+
+  }else{//if tnere no file by default dir list
+    //res.send('Hello list');
+    console.log("HERE DIR?")
+    const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
+    let dirname = req.params[0];
+    console.log("dirname")
+    console.log(dirname)
+    const list = await drive.promises.readdir("/"+dirname);
+    drive.close();
+    res.json({dir:'/'+dirname,list:list});
+  }
+  //const content = await drive.promises.readFile(filepath, 'utf-8')
+  //res.send('Hello ' + req.name + '!');
+})
+
+router.get('/drive/:key',async function (req, res) {
+  
+  //const drive = await getHyperDrive();
+  console.log(req.params)
+  //console.log('Request URL:', req.originalUrl)
+
+  var ext = re.exec(req.params.key)[1];
+  if(ext){
+    console.log('File?')
+    const drive = await getHyperDrive();
+    const content = await drive.promises.readFile(req.params.key, 'utf-8')
+    const mimetype = mime.lookup(req.params.key);
     //console.log(mimetype)
     res.setHeader('Content-type', mimetype);
     return res.end(content);
     //return res.send(content);
+  }else{
+    //drive key?
+    // need to have key id local and server check for this...
+    //console.log('KEY?')
+    const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
+    const list = await drive.promises.readdir("/");
+    //console.log(list);
+    drive.close();
+    return res.json({dir:"/",list:list});
   }
-
-  const list = await drive.promises.readdir('/');
-  res.json({dir:'/',list:list});
-
-  //const content = await drive.promises.readFile(filepath, 'utf-8')
-  //res.send('Hello ' + req.name + '!');
+  res.send('!');
 })
+
 //https://stackoverflow.com/questions/67767954/set-the-filename-for-file-download-with-use-of-fetch
 // https://stackoverflow.com/questions/7288814/download-a-file-from-nodejs-server-using-express
 router.get('/download/*',async function (req, res) {
@@ -270,6 +316,7 @@ router.get('/download/*',async function (req, res) {
     //res.setHeader('content-type', 'text/plain');//works
     return res.end(content);
   }
+  return res.end('error');
 })
 
 module.exports = router;

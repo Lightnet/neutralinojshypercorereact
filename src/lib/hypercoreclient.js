@@ -3,7 +3,6 @@
   Created by: Lightnet
 */
 
-
 const { Client: HyperspaceClient } = require('hyperspace');
 const Hyperdrive = require('hyperdrive');
 
