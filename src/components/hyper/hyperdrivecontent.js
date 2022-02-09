@@ -319,10 +319,13 @@ export default function HyperDriveContent(){
         let bedit = <></>;
         let bdelete = <></>;
         let bdowload = <></>;
+        let bdowloadlink = <></>;
+        //bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} target="_blank">Download</a>
         if(ext){
           if(ext== 'txt'){
             bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
             bdowload=<button onClick={()=>clickDownload(item)}>Download</button>
+            bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} >Download</a>
             bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
           }
         }else{
@@ -332,7 +335,7 @@ export default function HyperDriveContent(){
         //console.log("NAME:",item)
         //console.log(ext);
         return <div key={item}>
-            <label> {item}</label> {bdowload} {bedit} {bdelete}
+            <label> {item}</label> {bdowloadlink} {bdowload} {bedit} {bdelete}
           </div>
       })
     }else if(viewType=='texteditor'){
@@ -458,10 +461,11 @@ export default function HyperDriveContent(){
       );
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute(
-        'download',
-        filename,
-      );
+      
+      link.setAttribute('download',filename,);
+      
+      //link.setAttribute('download',true,);
+      link.setAttribute('target','_blank');
 
       // Append to html link element page
       document.body.appendChild(link);

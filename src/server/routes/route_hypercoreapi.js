@@ -12,6 +12,7 @@ const router = express.Router()
 const path = require('path');
 const multer  = require('multer')
 const upload = multer()
+const mime = require('mime');
 
 const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient');
 
@@ -236,7 +237,10 @@ router.get('/drive/*',async function (req, res) {
     //res.type('txt')
     //res.header("Content-Type", "text/cache-manifest");
     //res.setHeader('Content-type', 'txt');//work
-    res.setHeader('content-type', 'text/plain');//works
+    //res.setHeader('content-type', 'text/plain');//works
+    const mimetype = mime.lookup(req.params[0]);
+    //console.log(mimetype)
+    res.setHeader('Content-type', mimetype);
     return res.end(content);
     //return res.send(content);
   }
@@ -248,13 +252,22 @@ router.get('/drive/*',async function (req, res) {
   //res.send('Hello ' + req.name + '!');
 })
 //https://stackoverflow.com/questions/67767954/set-the-filename-for-file-download-with-use-of-fetch
+// https://stackoverflow.com/questions/7288814/download-a-file-from-nodejs-server-using-express
 router.get('/download/*',async function (req, res) {
   const drive = await getHyperDrive();
   var ext = re.exec(req.params[0])[1];
 
   if(ext){
     const content = await drive.promises.readFile(req.params[0], 'utf-8')
-    res.setHeader('content-type', 'text/plain');//works
+    const filename = path.basename(req.params[0]);
+    console.log(filename)
+    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+
+    const mimetype = mime.lookup(req.params[0]);
+    console.log(mimetype)
+    res.setHeader('Content-type', mimetype);
+
+    //res.setHeader('content-type', 'text/plain');//works
     return res.end(content);
   }
 })
