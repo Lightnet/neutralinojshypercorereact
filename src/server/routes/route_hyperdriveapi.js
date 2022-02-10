@@ -196,12 +196,13 @@ router.post('/driveupload', upload.single('File'),async function (req, res) {
     let filepath = path.join(dirname,req.file.originalname)
     filepath = filepath.replaceAll("\\" , "/");
     await drive.promises.writeFile(filepath, req.file.buffer)
+    return res.json({message:'uploaded'});
   }catch(e){
     console.log(e.message)
-    res.json({error:e.message});
+    return res.json({error:e.message});
   }
 
-  res.json({message:'uploaded'});
+  return res.json({error:"error"});
 })
 
 /*
@@ -232,8 +233,16 @@ router.get('/drive/:key/*',async function (req, res) {
   if(req.params.key.length == 64){
     console.log('ok')
   }else{
-    console.log('fail')
-    res.send('Invalid key char 64='+req.params.key.length);
+    //console.log('fail')
+    //res.send('Invalid key char 64='+req.params.key.length);
+    const drive = new Hyperdrive('./my-hyperdrive');
+
+    const content = await drive.promises.readFile("/"+req.params.key + "/" + req.params[0],'binary')
+    const mimetype = mime.lookup(req.params[0]);
+    drive.close();
+    console.log(mimetype)
+    res.setHeader('Content-type', mimetype);
+    res.end(content);
     return;
   }
 
@@ -246,12 +255,13 @@ router.get('/drive/:key/*',async function (req, res) {
 
     const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
     //const list = await drive.promises.readdir("/");
-    const content = await drive.promises.readFile(req.params[0], 'utf-8')
+    //const content = await drive.promises.readFile(req.params[0], 'utf-8')
+    const content = await drive.promises.readFile(req.params[0],'binary')
     const mimetype = mime.lookup(req.params[0]);
     drive.close();
     console.log(mimetype)
     res.setHeader('Content-type', mimetype);
-    res.end(content);
+    return res.end(content);
 
   }else{//if tnere no file by default dir list
     //res.send('Hello list');
@@ -262,7 +272,7 @@ router.get('/drive/:key/*',async function (req, res) {
     console.log(dirname)
     const list = await drive.promises.readdir("/"+dirname);
     drive.close();
-    res.json({dir:'/'+dirname,list:list});
+    return res.json({dir:'/'+dirname,list:list});
   }
   //const content = await drive.promises.readFile(filepath, 'utf-8')
   //res.send('Hello ' + req.name + '!');
@@ -276,9 +286,11 @@ router.get('/drive/:key',async function (req, res) {
 
   var ext = re.exec(req.params.key)[1];
   if(ext){
-    console.log('File?')
+    console.log('File >>?')
     const drive = await getHyperDrive();
-    const content = await drive.promises.readFile(req.params.key, 'utf-8')
+    //const content = await drive.promises.readFile(req.params.key)
+    const content = await drive.promises.readFile(req.params.key,'binary')
+    //const content = await drive.promises.readFile(req.params.key, 'hex')
     const mimetype = mime.lookup(req.params.key);
     //console.log(mimetype)
     res.setHeader('Content-type', mimetype);

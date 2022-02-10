@@ -42,6 +42,7 @@
 
 - Hyperdrive (file management)
   - local (default without the key for general access, configs and save drive keys)
+    - image check view (added / png)
     - create file (added)
     - rename file (not added)
     - upload (added)

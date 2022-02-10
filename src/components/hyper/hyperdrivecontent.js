@@ -34,8 +34,38 @@ var imageexts=[
   ,'svg'
 ];
 
-function checkExt(name){
+function checkTextExt(_filename){
+  let ext = re.exec(_filename)[1];
+  if(!ext){
+    console.log("NULL")
+    return false;
+  }else{
+    ext = ext.toLowerCase();
+  }
+  if (textexts.indexOf(ext) < 0) {  // Wasn't found
+    console.log("NOT FOUND")
+    return false;
+  }else{// found
+    console.log("FOUND")
+    return true;
+  }
+}
 
+function checkImageExt(_filename){
+  let ext = re.exec(_filename)[1];
+  if(!ext){
+    console.log("NULL")
+    return false;
+  }else{
+    ext = ext.toLowerCase();
+  }
+  if (imageexts.indexOf(ext) < 0) {  // Wasn't found
+    console.log("NOT FOUND")
+    return false;
+  }else{// found
+    console.log("FOUND")
+    return true;
+  }
 }
 
 export default function HyperDriveContent(){
@@ -47,6 +77,7 @@ export default function HyperDriveContent(){
   const [viewType, setViewType] = useState('dir');// dir, text, image, upload
 
   const [file,setFile] = useState('');
+  const [imageFile,setImageFile] = useState('');
   const [textContent,setTextContent] = useState("");
   const contentEditable = createRef(null);
 
@@ -74,6 +105,11 @@ export default function HyperDriveContent(){
 
   function typeCreateDirName(event){
     setCreateDirName(event.target.value)
+  }
+
+  function clickRefresh(){
+    setViewType('dir');
+    getDriveDir();
   }
 
   async function getDriveDir(){
@@ -131,6 +167,18 @@ export default function HyperDriveContent(){
     setDrive(event.target.value)
   }
 
+  function viewImage(_filename){
+    let tmpFile = _filename;
+    if(dirname == "/"){
+      tmpFile = "http://localhost/drive/" + tmpFile;
+    }else{
+      tmpFile = "http://localhost/drive" + dirname + "/" + tmpFile;
+    }
+
+    setImageFile(tmpFile);
+    setViewType('image');
+  }
+
   async function clickEdit(filename){
     let data = await useFetch('http://localhost/drive',{
         method:'POST'
@@ -186,8 +234,8 @@ export default function HyperDriveContent(){
   async function clickTextCreate(){
 
     let filestr = file;
-    var ext = filestr.substring(filestr.lastIndexOf('.') + 1);
-    if(ext=='txt'){
+    //var ext = filestr.substring(filestr.lastIndexOf('.') + 1);
+    if(checkTextExt(filestr)==true){
 
     }else{
       console.log('ext need it...');
@@ -218,7 +266,8 @@ export default function HyperDriveContent(){
     //}
   }
 
-  function clickEditCancel(){
+  function clickEditCancel(event){
+    event.preventDefault();
     setViewType('dir');
   }
 
@@ -276,7 +325,8 @@ export default function HyperDriveContent(){
     }
   }
 
-  function clickUpload(){
+  function clickUpload(event){
+    event.preventDefault();
     setViewType('upload');
   }
 
@@ -289,8 +339,13 @@ export default function HyperDriveContent(){
 		setIsSelected(true);
   }
 
-  function clickUploadHandle(){
+  function clickUploadHandle(event){
+    event.preventDefault();
     console.log('upload');
+    if(!selectedFile){
+      console.log('EMPTY');
+      return;
+    }
     const formData = new FormData();
     formData.append('File', selectedFile);
     formData.append('dirname', dirname);
@@ -304,6 +359,9 @@ export default function HyperDriveContent(){
 			.then((response) => response.json())
 			.then((result) => {
 				console.log('Success:', result);
+        if(result.message=='uploaded'){
+          setViewType('dir');
+        }
 			})
 			.catch((error) => {
 				console.error('Error:', error);
@@ -320,22 +378,30 @@ export default function HyperDriveContent(){
         let bdelete = <></>;
         let bdowload = <></>;
         let bdowloadlink = <></>;
+        let bcd = <></>;
+        let bimg = <></>;
         //bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} target="_blank">Download</a>
+        console.log("NAME:",item);
+        checkTextExt(item);
         if(ext){
-          if(ext== 'txt'){
+          if(checkTextExt(item)==true){
             bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
             bdowload=<button onClick={()=>clickDownload(item)}>Download</button>
             bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} >Download</a>
             bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
           }
+          if(checkImageExt(item)==true){
+            //bimg=<img src={"http://localhost/drive"+"/"+item} />
+            bimg=<button onClick={()=>viewImage(item)}> View Image </button>
+          }
         }else{
-
+          bcd = <button onClick={()=>clickChangeDir(item)}>Dir</button>
         }
         
         //console.log("NAME:",item)
         //console.log(ext);
         return <div key={item}>
-            <label> {item}</label> {bdowloadlink} {bdowload} {bedit} {bdelete}
+            <label> {item}</label> {bimg} {bcd} {bdowloadlink} {bdowload} {bedit} {bdelete}
           </div>
       })
     }else if(viewType=='texteditor'){
@@ -371,9 +437,8 @@ export default function HyperDriveContent(){
       </>
     }else if(viewType=='image'){
       return <>
-        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} /><br />
-        <button> Delete </button>
-        <button onClick={clickEditCancel}> Cancel </button>
+        <label> File Name:{imageFile} </label> <button> Delete </button> <button onClick={clickEditCancel}> Cancel </button> <br />
+        <img src={imageFile} />
       </>
     }else if(viewType=='upload'){
       return <>
@@ -403,6 +468,16 @@ export default function HyperDriveContent(){
     if(data.list){
       setDirList(data.list);
     }
+  }
+
+  function clickChangeDir(_dirname){
+    if(dirname == "/"){
+      setDirName(dirname+_dirname)
+    }else{
+      setDirName(dirname+"/"+_dirname)
+    }
+    
+    DriveDirList(dirname+"/"+_dirname);
   }
 
   function typeDirEnter(event){
@@ -480,7 +555,7 @@ export default function HyperDriveContent(){
   
   return <div>
     <div>
-      <button onClick={getDriveDir}> Refresh </button>
+      <button onClick={clickRefresh}> Refresh </button>
       <button onClick={createDrive}> Create </button>
       <button onClick={getDrive}> Get </button>
       <input size="64" value={drive} onChange={typeDrive}/>
