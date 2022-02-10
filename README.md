@@ -2,6 +2,15 @@
 
 # Created By: Lightnet
 
+# Notes:
+- hypercore 10 upcoming and not used.
+  - dev working the new build
+  - 02.10.2022
+- hypercore 9.12.0 Current used.
+- hypercore 9
+  - replicate not working just test example.
+
+
 # Packges:
 - @neutralinojs/neu
 - express
@@ -46,8 +55,8 @@
 
   - create drive key (not added)
   - list drive key (not added)
-- Hyperbee (database) (not added)
-  - key (not added)
+- Hyperbee (database) (added)
+  - key, value (added / simple get local db)
   - sub key (not added)
 
 - express
@@ -77,8 +86,6 @@ http://localhost/hyper/000000.../filename.txt <- key drive with file
 ```
   It need to check if there key or file that be loaded. One for access to local drive and other is key drive
 
-
-
 # Set Up:
 
 ```
@@ -89,7 +96,6 @@ neu update
 
 npm run dev
 ```
-
 
 # Dev:
 ```
@@ -106,6 +112,10 @@ npm run dev
     "events.*"
   ],
 ```
+
+# Bugs and Notes:
+- download ask prompt does not appear.
+- hypercore 
 
 # Links:
 - https://hypercore-protocol.org/

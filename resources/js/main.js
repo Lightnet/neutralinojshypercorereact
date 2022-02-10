@@ -7,7 +7,7 @@
 
 */
 
-console.log('NL_APPID',NL_APPID);
+//console.log('NL_APPID',NL_APPID);
 console.log('NL_OS',NL_OS);
 console.log('NL_PORT',NL_PORT);
 // https://neutralino.js.org/docs/api/os#ossettrayoptions
@@ -95,5 +95,5 @@ Neutralino.events.on("windowClose", onWindowClose);
 if(NL_OS != "Darwin") { // TODO: Fix https://github.com/neutralinojs/neutralinojs/issues/615
   setTray();
 }
-console.log('[0]Neutralino init...');
+console.log('[0]Neutralino init...',0);
 //showInfo();

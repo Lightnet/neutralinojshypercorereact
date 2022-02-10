@@ -7,7 +7,7 @@ const { Client: HyperspaceClient } = require('hyperspace');
 const Hyperdrive = require('hyperdrive');
 
 var hyperClient;
-var coreStore;
+//var coreStore;
 
 // https://hypercore-protocol.github.io/new-website/guides/hyperspace/corestore/
 // https://github.com/hypercore-protocol/corestore
@@ -103,3 +103,19 @@ exports.getHyperDrive = async function getHyperDrive(){
   //return 'test HDrive';
   return drive;
 }
+
+
+
+// https://hypercore-protocol.org/guides/getting-started/standalone-modules/
+//const core = new Hypercore('./my-hyperbee')
+//const bee = new Hyperbee(core)
+
+/*
+const Hyperbee = require('hyperbee');
+const core = Hypercore('./my-hyperbee')
+
+const db = new Hyperbee(core, {
+  keyEncoding: 'utf-8', // can be set to undefined (binary), utf-8, ascii or and abstract-encoding
+  valueEncoding: 'utf-8' // same options as above
+})
+*/

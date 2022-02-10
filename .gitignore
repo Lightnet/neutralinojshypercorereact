@@ -14,6 +14,11 @@ neutralino.js
 *.log
 
 my-hyperdrive
+my-hyperbee
+my-hyperswarm
+my-hyperspace
+
+storage
 
 node_modules
 package-lock.json
