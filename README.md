@@ -71,7 +71,7 @@ Home | About | Drive | Text Editor | Upload
 
 ```
 Refresh (reload current dirname) | Create (not added) | Get (drive id) |
-New Text File | Upload | mkdir | rmdir | dir (createDirName)
+New Text File | Upload | mkdir | rmdir | dir (createDirName full path)
 Directory | Input (dirname / Enter )
 
 Dir List Map
@@ -80,12 +80,13 @@ Dir List Map
 
 ### Drive Urls:(work in progress)
 ```
-http://localhost/hyper/filename.txt <-local drive
-http://localhost/hyper/testfolder/filename.txt <-local drive with folder
-
-http://localhost/hyper/000000.../filename.txt <- key drive with file
+http://localhost/drive/filename.txt <-local drive
+http://localhost/drive/testfolder/filename.txt <-local drive with folder
+http://localhost/drive/000000.../filename.txt <- key drive with file
 ```
-  It need to check if there key or file that be loaded. One for access to local drive and other is key drive
+  It need to check if there key or file that be loaded. One for access to local drive and other is key drive.
+
+  It will go with some simple check on drive id or file pathing.
 
 # Set Up:
 
@@ -121,8 +122,6 @@ npm run dev
 # Links:
 - https://hypercore-protocol.org/
 - https://neutralino.js.org/
-
-
 - https://hypercore-protocol.org/guides/examples/hyperdrive-app/
 - https://github.com/neutralinojs/neutralinojs
 

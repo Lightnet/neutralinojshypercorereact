@@ -16,14 +16,14 @@ var routeUpload = require('./routes/route_upload');
 //})
 
 // define the about route
-router.get('/api/test', function (req, res) {
-  res.send(JSON.stringify({meesage:'test'}));
-})
+//router.get('/api/test', function (req, res) {
+  //res.send(JSON.stringify({meesage:'test'}));
+//})
 
-router.get('/test', function (req, res) {
-  console.log('test');
-  res.send(JSON.stringify({meesage:'test'}));
-})
+//router.get('/test', function (req, res) {
+  //console.log('test');
+  //res.send(JSON.stringify({meesage:'test'}));
+//})
 
 router.use('/',routeHyperdriveapi);
 router.use('/',routeHyperbeeapi);
