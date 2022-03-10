@@ -2,6 +2,9 @@
 
 # Created By: Lightnet
 
+# Status:
+- Prototyping builds.
+
 # Notes:
 - hypercore 10 upcoming and not used.
   - dev working the new build
@@ -10,6 +13,16 @@
 - hypercore 9
   - replicate not working just test example.
 
+# Information:
+  Portable application for simple web hosting and file sharing. It only needs nodejs install to get those packages added and running.
+
+  By using the react.js for UI design and fetch/request call url for data upload and download. Without need to refresh the page or reload them since those components is modular format. Work in progress.
+
+  One is React.js is bundle single file for client browser. It save bandwidth in some degree.
+
+  As for the stream data that have not try yet.
+## Refs:
+- https://hypercore-protocol.org/
 
 # Packges:
 - @neutralinojs/neu
@@ -22,24 +35,9 @@
 - webpack
 - browser-sync
 
-# Information:
-  Portable application for simple web hosting and file sharing. It only needs nodejs install to get those packages added and running.
-
-  By using the htpp and hyper server address protocol. Just like torrent address. To set up simple UI for access files and web page. Idea design.
-
-  https://hypercore-protocol.org/
-
-  Hypercore Protocol is peer to peer data sharing. With the prefix of hyper"name" for hyperdrive, hyperspace, hyperbee and other modular packages.
-
-  By using the react.js for UI design and fetch call url for data upload and download. Without need to refresh the page or reload them since those components is modular format. Work in progress.
-
-  One is React.js is bundle single file for client browser. It save bandwidth in some degree.
-
-  As for the stream data that have not try yet.
-
 # Features:
 - Auth check access. (Not build / Testing...)
-
+- hypercore peer to peer network ( not build )
 - Hyperdrive (file management)
   - local (default without the key for general access, configs and save drive keys)
     - image check view (added / png)
@@ -89,7 +87,9 @@ http://localhost/drive/000000.../filename.txt <- key drive with file
   It will go with some simple check on drive id or file pathing.
 
 # Set Up:
+  Install nodejs
 
+## neutralinojs app
 ```
 npm install
 npm i -g @neutralinojs/neu
@@ -97,6 +97,12 @@ npm i -g @neutralinojs/neu
 neu update
 
 npm run dev
+```
+## express web app
+```
+npm install
+
+npm run devweb
 ```
 
 # Dev:
@@ -124,4 +130,3 @@ npm run dev
 - https://neutralino.js.org/
 - https://hypercore-protocol.org/guides/examples/hyperdrive-app/
 - https://github.com/neutralinojs/neutralinojs
-

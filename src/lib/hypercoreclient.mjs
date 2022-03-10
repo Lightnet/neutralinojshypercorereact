@@ -3,8 +3,11 @@
   Created by: Lightnet
 */
 
-const { Client: HyperspaceClient } = require('hyperspace');
-const Hyperdrive = require('hyperdrive');
+//const { Client: HyperspaceClient } = require('hyperspace');
+//const Hyperdrive = require('hyperdrive');
+
+import { Client as HyperspaceClient } from "hyperspace";
+import Hyperdrive from "hyperdrive";
 
 var hyperClient;
 //var coreStore;
@@ -19,7 +22,7 @@ const newCore = corestore.get() // create a new hypercore
 const existingCore = corestore.get(key) // get an existing hypercore
 */
 
-exports.getHyperClient = async function getHyperClient(){
+export async function getHyperClient(){
 
   if(hyperClient){
     return hyperClient;
@@ -81,7 +84,7 @@ exports.getHyperClient = async function getHyperClient(){
 
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-const drive = new Hyperdrive('./my-hyperdrive') // content will be stored in this folder
+export const drive = new Hyperdrive('./my-hyperdrive') // content will be stored in this folder
 //const drive='test';
 /*
 drive.ready(err => {
@@ -97,14 +100,12 @@ drive.ready(err => {
 
 // main access current folder
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
-exports.getHyperDrive = async function getHyperDrive(){
+export async function getHyperDrive(){
   //console.log(drive);
   //console.log('my drive');
   //return 'test HDrive';
   return drive;
 }
-
-
 
 // https://hypercore-protocol.org/guides/getting-started/standalone-modules/
 //const core = new Hypercore('./my-hyperbee')

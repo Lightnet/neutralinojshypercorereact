@@ -3,15 +3,23 @@
   Created by: Lightnet
 */
 
-const express = require('express')
-const app = express()
-const port = 80
-var routes = require('./routes')
-var cors = require('cors')
-var bodyParser = require('body-parser')
+//const express = require('express')
+//const app = express()
+//const PORT = process.env.PORT || 3000;
+//var routes = require('./routes.mjs')
+//var cors = require('cors')
+//var bodyParser = require('body-parser')
 //const { Server: HyperspaceServer } = require('hyperspace');
 
+import express from "express";
+import routes from "./routes.mjs";
+import cors from "cors";
+
+const PORT = process.env.PORT || 3000;
+
 async function main(){
+  const app = express()
+
   /*
   const server = new HyperspaceServer({
     storage: './my-hyperspace-storage',
@@ -29,12 +37,13 @@ async function main(){
   console.log('init HyperspaceServer');
   */
   //app.use(express.static('public'))
-  app.use(express.static('./public'))
+  app.use(express.static('./resources'))
   app.use(cors())
   // parse application/x-www-form-urlencoded
-  app.use(bodyParser.urlencoded({ extended: false }))
+  //app.use(bodyParser.urlencoded({ extended: false }))
   // parse application/json
-  app.use(bodyParser.json())
+  //app.use(bodyParser.json())
+  app.use(express.json())
 
   //app.get('/', (req, res) => {
     //res.send('Hello World!')
@@ -42,11 +51,14 @@ async function main(){
 
   app.use("/",routes)
   
-  app.listen(port, () => {
-    console.log(`web server listen http://localhost:${port}`)
+  app.listen(PORT, () => {
+    console.log(`web server listen http://localhost:${PORT}`)
   })
+
+  return app;
 }
 
 main();
 //module.exports.main = main;
-module.exports = main;
+//module.exports = main;
+export default main;

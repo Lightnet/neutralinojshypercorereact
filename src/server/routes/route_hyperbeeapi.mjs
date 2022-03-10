@@ -5,13 +5,20 @@
 
 // https://hypercore-protocol.org/guides/walkthroughs/p2p-indexing-with-hyperbee/
 // https://hypercore-protocol.org/guides/walkthroughs/p2p-indexing-with-hyperbee/
-const express = require('express');
-const { isEmpty } = require('../../lib/helperserver');
-const router = express.Router()
-const path = require('path');
-const Hypercore = require('hypercore');
-const Hyperbee = require('hyperbee');
+//const express = require('express');
+//const { isEmpty } = require('../../lib/helperserver');
+//const router = express.Router()
+//const path = require('path');
+//const Hypercore = require('hypercore');
+//const Hyperbee = require('hyperbee');
+
+import express from "express";
+import Hypercore from "hypercore";
+import Hyperbee from "hyperbee";
+
 const core = Hypercore('./my-hyperbee')
+
+const router = express.Router()
 
 const db = new Hyperbee(core, {
   keyEncoding: 'utf-8', // can be set to undefined (binary), utf-8, ascii or and abstract-encoding
@@ -66,4 +73,5 @@ router.post('/bee', async function (req, res) {
   res.json({error:'error NULL'});
 })
 
-module.exports = router;
+//module.exports = router;
+export default router;

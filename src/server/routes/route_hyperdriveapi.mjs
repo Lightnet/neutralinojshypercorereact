@@ -6,16 +6,27 @@
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 // https://www.thatsoftwaredude.com/content/8912/create-a-basic-text-editor-in-javascript
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-const express = require('express');
-const { isEmpty } = require('../../lib/helperserver');
-const router = express.Router()
-const path = require('path');
-const multer  = require('multer')
-const upload = multer()
-const mime = require('mime');
-const Hyperdrive = require('hyperdrive');
+//const express = require('express');
+//const { isEmpty } = require('../../lib/helperserver.mjs');
+//const path = require('path');
+//const multer  = require('multer')
+//const mime = require('mime');
+//const Hyperdrive = require('hyperdrive');
+//const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient.mjs');
 
-const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient');
+import express from "express";
+import path from "path";
+import multer from "multer";
+//import mime from "mime";
+import Hyperdrive from "hyperdrive";
+
+import { isEmpty } from "../../lib/helper.mjs";
+import { getHyperDrive } from "../../lib/hypercoreclient.mjs";
+import { URL } from 'url';
+const __dirname = new URL('.', import.meta.url).pathname;
+
+const router = express.Router()
+const upload = multer()
 
 // define the about route
 router.get('/drive', async function (req, res) {
@@ -238,7 +249,7 @@ router.get('/drive/:key/*',async function (req, res) {
     const drive = new Hyperdrive('./my-hyperdrive');
 
     const content = await drive.promises.readFile("/"+req.params.key + "/" + req.params[0],'binary')
-    const mimetype = mime.lookup(req.params[0]);
+    const mimetype = express.static.mime.lookup(req.params[0]);
     drive.close();
     console.log(mimetype)
     res.setHeader('Content-type', mimetype);
@@ -257,7 +268,7 @@ router.get('/drive/:key/*',async function (req, res) {
     //const list = await drive.promises.readdir("/");
     //const content = await drive.promises.readFile(req.params[0], 'utf-8')
     const content = await drive.promises.readFile(req.params[0],'binary')
-    const mimetype = mime.lookup(req.params[0]);
+    const mimetype = express.static.mime.lookup(req.params[0]);
     drive.close();
     console.log(mimetype)
     res.setHeader('Content-type', mimetype);
@@ -291,7 +302,7 @@ router.get('/drive/:key',async function (req, res) {
     //const content = await drive.promises.readFile(req.params.key)
     const content = await drive.promises.readFile(req.params.key,'binary')
     //const content = await drive.promises.readFile(req.params.key, 'hex')
-    const mimetype = mime.lookup(req.params.key);
+    const mimetype = express.static.mime.lookup(req.params.key);
     //console.log(mimetype)
     res.setHeader('Content-type', mimetype);
     return res.end(content);
@@ -321,7 +332,7 @@ router.get('/download/*',async function (req, res) {
     console.log(filename)
     res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 
-    const mimetype = mime.lookup(req.params[0]);
+    const mimetype = express.static.mime.lookup(req.params[0]);
     console.log(mimetype)
     res.setHeader('Content-type', mimetype);
 
@@ -331,4 +342,5 @@ router.get('/download/*',async function (req, res) {
   return res.end('error');
 })
 
-module.exports = router;
+//module.exports = router;
+export default router;

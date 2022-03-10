@@ -9,7 +9,7 @@
 // s
 
 import React,{createRef, useEffect, useState} from "react";
-import { nanoid16 } from "../../lib/helper";
+import { nanoid16 } from "../../lib/helper.mjs";
 import useFetch from '../hook/usefetch';
 //import ContentEditable from "react-contenteditable";
 import styles from './editor.module.css';
@@ -114,7 +114,7 @@ export default function HyperDriveContent(){
 
   async function getDriveDir(){
     if(dirname=='/'){
-      let data = await useFetch('http://localhost/drive');
+      let data = await useFetch('/drive');
       //console.log(data);
       if(data.error){
         console.log('Fetch Error get dir list.')
@@ -142,7 +142,7 @@ export default function HyperDriveContent(){
   }
 
   async function getDrive(){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
         mode:'drivekey'
@@ -180,7 +180,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickEdit(filename){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
           dirname:dirname
@@ -206,7 +206,7 @@ export default function HyperDriveContent(){
     //console.log(contentEditable.current.textContent);
     console.log(contentEditable.current.innerHTML);
 
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
           dirname:dirname
@@ -242,7 +242,7 @@ export default function HyperDriveContent(){
       return;
     }
 
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
           dirname:dirname
@@ -277,7 +277,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickDeleteFile(filename){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'DELETE'
       , body:JSON.stringify({
           dirname:dirname
@@ -296,7 +296,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickMakeDir(){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
         dirname:createDirName
@@ -311,7 +311,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickRemoveDir(){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
         dirname:createDirName
@@ -350,7 +350,7 @@ export default function HyperDriveContent(){
     formData.append('File', selectedFile);
     formData.append('dirname', dirname);
     fetch(
-			'http://localhost/driveupload',
+			'/driveupload',
 			{
 				method: 'POST',
 				body: formData,
@@ -452,7 +452,7 @@ export default function HyperDriveContent(){
   }
 
   async function DriveDirList(name){
-    let data = await useFetch('http://localhost/drive',{
+    let data = await useFetch('/drive',{
         method:'POST'
       , body:JSON.stringify({
           dirname:name
