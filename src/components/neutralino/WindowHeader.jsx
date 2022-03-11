@@ -1,7 +1,8 @@
 
 
 import React, { useEffect } from "react";
-import ThemeButton from "../theme/themebutton";
+import ThemeButton from "../theme/ThemeButton.jsx";
+import { Button } from "@blueprintjs/core";
 
 export default function WindowHeader(){
 
@@ -63,14 +64,14 @@ export default function WindowHeader(){
     </div>
     <div style={{position:'fixed',left:'0px',top:'0px'}}>
       <img className="imgbtn" height='18px' width='18px' src="/icons/menulist.svg"></img>
-      <img onClick={clickReload} className="imgbtn" height='18px' width='18px' src="/icons/refresh.svg"></img>
-      <img onClick={clickRefresh} className="imgbtn" height='18px' width='18px' src="/icons/refresh2.svg"></img>
+      <Button icon="reset" small onClick={clickReload} >Reload</Button>
+      <Button icon="refresh" small onClick={clickRefresh}>Refresh</Button>
       <ThemeButton></ThemeButton>
     </div>
     <div style={{position:'fixed',right:'0px',top:'0px'}}>
-      <img className="imgbtn" onClick={windowMini} height='18px' width='18px' src="/icons/minimize.svg"></img>
-      <img className="imgbtn" onClick={clickToggleScreen} height='18px' width='18px' src="/icons/fullscreen1.svg"></img>
-      <img className="imgbtn" onClick={clickClose} height='18px' width='18px' src="/icons/close.svg"></img>
+      <Button icon="small-minus" small onClick={windowMini}></Button>
+      <Button icon="maximize" small onClick={clickToggleScreen}></Button>
+      <Button icon="cross" small onClick={clickClose}></Button>
     </div>
   </>
 }

@@ -46,15 +46,6 @@ body {
     color: var(--text-color);
 }
 
-a {
-    color: var(--link-color);
-}
-
-a:hover {
-    text-decoration: underline;
-    filter: brightness(80%);
-}
-
 .imgbtn{
     background:gray;
 }

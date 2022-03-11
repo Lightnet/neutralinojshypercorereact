@@ -5,7 +5,7 @@
 // https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
 
 import React, { useEffect, useState } from "react";
-import useFetch from "../hook/usefetch";
+import useFetch from "../hook/useFetch.mjs";
 
 export default function HyperBeeContent(){
 

@@ -6,7 +6,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-export default function NavBar(){
+export default function MenuNavBar(){
 
   return <div style={{width:'100%', height:'28px'}} >
     <Link to="/" > Home </Link><span> | </span>

@@ -19,6 +19,8 @@ export function useNeutralino(){
 export function NeutralinoProvider(props){
 
   const [isApp, setIsApp] = useState(false);
+  const [HOSTURL, setHOSTURL] = useState(false);
+  const [API_URL , setAPI_URL] = useState('http://localhost:3000');
 
   //check neutralino api 
   useEffect(()=>{
@@ -26,9 +28,13 @@ export function NeutralinoProvider(props){
   },[])
 
   const value = useMemo(()=>({
-    isApp, setIsApp
+    isApp, setIsApp,
+    HOSTURL, setHOSTURL,
+    API_URL , setAPI_URL
   }),[
-    isApp
+    isApp,
+    HOSTURL,
+    API_URL
   ])
 
   return <neutralinoContext.Provider value={value}  {...props}/>

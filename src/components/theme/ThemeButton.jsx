@@ -3,7 +3,8 @@
   Created by: Lightnet
 */
 
-import React, { useState } from "react"
+import React, { useState } from "react";
+import { Button } from "@blueprintjs/core";
 
 export default function ThemeButton(){
 
@@ -24,7 +25,7 @@ export default function ThemeButton(){
     localStorage.setItem('theme', targetTheme);
   }
 
-  return <button onClick={clickToggle}>
+  return <Button className="bp3-button" small onClick={clickToggle}>
     Theme: {theme}
-  </button>
+  </Button>
 }

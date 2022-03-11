@@ -10,7 +10,7 @@
 
 import React,{createRef, useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
-import useFetch from '../hook/usefetch';
+import useFetch from '../hook/useFetch.mjs';
 //import ContentEditable from "react-contenteditable";
 import styles from './editor.module.css';
 
