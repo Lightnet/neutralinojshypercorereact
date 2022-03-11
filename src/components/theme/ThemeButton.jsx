@@ -5,6 +5,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@blueprintjs/core";
+import { capitalizeFirstLetter } from "../../lib/helper.mjs";
 
 export default function ThemeButton(){
 
@@ -12,7 +13,7 @@ export default function ThemeButton(){
 
 
   function clickToggle(){
-    console.log('theme');
+    //console.log('theme');
     let currentTheme = document.documentElement.getAttribute("data-theme");
     var targetTheme = "light";
 
@@ -26,6 +27,6 @@ export default function ThemeButton(){
   }
 
   return <Button className="bp3-button" small onClick={clickToggle}>
-    Theme: {theme}
+    Theme: {capitalizeFirstLetter(theme)}
   </Button>
 }

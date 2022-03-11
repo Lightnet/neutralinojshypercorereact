@@ -57,3 +57,7 @@ export function parseJwt(token) {
 
   return JSON.parse(jsonPayload);
 };
+
+export function capitalizeFirstLetter(s) {
+  return s && s[0].toUpperCase() + s.slice(1);
+}

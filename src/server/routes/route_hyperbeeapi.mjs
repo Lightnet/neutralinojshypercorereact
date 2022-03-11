@@ -5,12 +5,6 @@
 
 // https://hypercore-protocol.org/guides/walkthroughs/p2p-indexing-with-hyperbee/
 // https://hypercore-protocol.org/guides/walkthroughs/p2p-indexing-with-hyperbee/
-//const express = require('express');
-//const { isEmpty } = require('../../lib/helperserver');
-//const router = express.Router()
-//const path = require('path');
-//const Hypercore = require('hypercore');
-//const Hyperbee = require('hyperbee');
 
 import express from "express";
 import Hypercore from "hypercore";

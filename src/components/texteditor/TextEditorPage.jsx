@@ -8,14 +8,35 @@
 // https://reactjs.org/docs/dom-elements.html
 // https://lifesaver.codes/answer/react-ace-in-resizable-container-207
 
-import { Button, InputGroup } from "@blueprintjs/core";
+import { Button, Classes, Label } from "@blueprintjs/core";
 import React,{createRef, useEffect, useState} from "react";
-import useFetch from '../hook/useFetch.mjs';
+//import useFetch from '../hook/useFetch.mjs';
 import {AceEditorRef} from "./AceEditor.jsx";
 
 export default function TextEditorPage(){
 
   const [file,setFile] = useState('');
+
+  const [mode, setMode] = useState("jsx");
+  const [extLangs,setExtLangs] = useState([
+      "jsx"
+    , "json"
+    , "javascript"
+    , "html"
+    , "css"
+  ]);
+
+  const [theme, setTheme] = useState("terminal");
+  const [selectThemes,setSelectTheme] = useState([
+      "terminal"
+    , "twilight"
+  ]);
+
+  const [showPrintMargin, setShowPrintMargin] = useState(false);
+  const [showGutter, setShowGutter] = useState(true);
+  const [highlightActiveLine, setHighlightActiveLine] = useState(true);
+
+
 
   const [content, setContent] = useState(`sdfdf`);
   const aceRef = createRef(null);
@@ -73,9 +94,25 @@ export default function TextEditorPage(){
     <div>
       
       <Button small onClick={clickPasteText}> Test </Button>
-      
-      <label>File Name:</label> <input fill={false} value={file} onChange={(e)=>setFile(e.target.value)} />
+      <label>File Name:</label> <input className={Classes.INPUT+" "+ Classes.SMALL } value={file} onChange={(e)=>setFile(e.target.value)} />
       <Button small onClick={clickSave}> Save </Button>
+      <label> Mode: </label>
+      <select value={mode} onChange={(e)=>setMode(e.target.value)}>
+        <option value={"jsx"}>jsx</option>
+        <option value={"json"}>json</option>
+        <option value={"javascript"}>javascript</option>
+        <option value={"html"}>html</option>
+        <option value={"css"}>css</option>
+      </select>
+      <label> Theme: </label>
+      <select value={theme} onChange={(e)=>setTheme(e.target.value)}>
+        <option value={"terminal"}>terminal</option>
+        <option value={"twilight"}>twilight</option>
+      </select>
+      <button onClick={(e)=>setShowPrintMargin(state=>!state)}>Print Margin {showPrintMargin ? ("x"):("o")}</button>
+      <button onClick={(e)=>setShowGutter(state=>!state)}>Gutter {showGutter ? ("x"):("o")}</button>
+      <button onClick={(e)=>setHighlightActiveLine(state=>!state)}> Highlight Active Line {highlightActiveLine ? ("x"):("o")}</button>
+
     </div>
     <AceEditorRef
       ref={aceRef}
@@ -87,16 +124,16 @@ export default function TextEditorPage(){
       //height={size?.editorHeight}
       //width={size?.editorWidth}
       //maxLines={Infinity}
-      mode="jsx"
+      mode={mode}
       //theme="github"
       //onLoad={onLoad}
-      theme="terminal"
+      theme={theme}
       value={content}
       onChange={onChangeContent}
       //name="UNIQUE_ID_OF_DIV"
-      showPrintMargin={true}
-      showGutter={true}
-      highlightActiveLine={true}
+      showPrintMargin={showPrintMargin}
+      showGutter={showGutter}
+      highlightActiveLine={highlightActiveLine}
       //editorProps={{ $blockScrolling: true }}
 
       setOptions={{

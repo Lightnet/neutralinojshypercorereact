@@ -14,11 +14,14 @@ export default function AceEditor(props,ref){
   useEffect( async()=>{
     if (typeof window !== 'undefined') {//server ssr
       const ReactAce = await import("react-ace");
-      //await import("ace-builds/src-noconflict/mode-java");
-      //await import("ace-builds/src-noconflict/mode-javascript");
+      await import("ace-builds/src-noconflict/mode-javascript");
       await import("ace-builds/src-noconflict/mode-jsx");
+      await import("ace-builds/src-noconflict/mode-json.js");
+      await import("ace-builds/src-noconflict/mode-html");
+      await import("ace-builds/src-noconflict/mode-css");
       //await import("ace-builds/src-noconflict/theme-github");
       await import("ace-builds/src-noconflict/theme-terminal");
+      await import("ace-builds/src-noconflict/theme-twilight");
       SetAce(ReactAce)
     }
   },[])

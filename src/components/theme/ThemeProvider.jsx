@@ -28,7 +28,6 @@ export function ThemeProvider(props){
     if (storedTheme){
       document.documentElement.setAttribute('data-theme', storedTheme)
     }
-
   },[])
 
   const value = useMemo(()=>({

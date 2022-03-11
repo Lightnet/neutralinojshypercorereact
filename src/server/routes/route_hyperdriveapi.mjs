@@ -6,18 +6,10 @@
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 // https://www.thatsoftwaredude.com/content/8912/create-a-basic-text-editor-in-javascript
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-//const express = require('express');
-//const { isEmpty } = require('../../lib/helperserver.mjs');
-//const path = require('path');
-//const multer  = require('multer')
-//const mime = require('mime');
-//const Hyperdrive = require('hyperdrive');
-//const { getHyperDrive, getHyperClient } = require('../../lib/hypercoreclient.mjs');
 
 import express from "express";
 import path from "path";
 import multer from "multer";
-//import mime from "mime";
 import Hyperdrive from "hyperdrive";
 
 import { isEmpty } from "../../lib/helper.mjs";
