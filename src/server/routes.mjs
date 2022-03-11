@@ -12,8 +12,10 @@
 import express from "express";
 
 import routeHyperdriveapi from "./routes/route_hyperdriveapi.mjs";
-import routeHyperbeeapi from "./routes/route_hyperbeeapi.mjs";
-import routeUpload from "./routes/route_upload.mjs";
+//import routeHyperbeeapi from "./routes/route_hyperbeeapi.mjs";
+//import routeUpload from "./routes/route_upload.mjs";
+//import { refreshBaseToken } from "./controllers/RefreshBaseToken.mjs";
+//import { refreshToken } from "./controllers/RefreshToken.mjs";
 
 const router = express.Router()
 
@@ -33,9 +35,14 @@ const router = express.Router()
   //res.send(JSON.stringify({meesage:'test'}));
 //})
 
+// https://mfikri.com/en/blog/react-express-mysql-authentication
+//router.get('/token', refreshToken); // get token last 15s
+//router.get('/basetoken', refreshBaseToken); // get token last 15s
+
+
 router.use('/',routeHyperdriveapi);
-router.use('/',routeHyperbeeapi);
-router.use('/',routeUpload);
+//router.use('/',routeHyperbeeapi);
+//router.use('/',routeUpload);
 
 //module.exports = router;
 export default router;

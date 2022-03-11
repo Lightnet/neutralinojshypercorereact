@@ -10,7 +10,9 @@
 
 import React,{createRef, useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
-import useFetch from '../hook/useFetch.mjs';
+import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
+//import useFetch from '../hook/useFetch.mjs';
+//import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
 //import ContentEditable from "react-contenteditable";
 import styles from './editor.module.css';
 
@@ -84,10 +86,24 @@ export default function HyperDriveContent(){
   const [selectedFile, setSelectedFile] = useState();
   const [isSelected,setIsSelected] = useState(false);
 
-  //mount once
+  //const {API_URL} = useHyperCore();
+
+  const [axiosJWT, isLoading] = useAxiosTokenAPI();
+
+
   useEffect(()=>{
-    getDriveDir()
-  },[])
+    console.log("axiosJWT init...");
+    console.log("isLoading: ", isLoading)
+    if((typeof axiosJWT?.instance=="function")&&(isLoading == false)){
+      console.log("GETTING...: ")
+      getDriveDir()
+    }
+  },[axiosJWT,isLoading])
+
+  //mount once
+  //useEffect(()=>{
+    //getDriveDir()
+  //},[])
 
   //event for text editor set up
   useEffect(()=>{
@@ -114,26 +130,37 @@ export default function HyperDriveContent(){
 
   async function getDriveDir(){
     if(dirname=='/'){
-      let data = await useFetch('/drive');
-      //console.log(data);
-      if(data.error){
-        console.log('Fetch Error get dir list.')
-        return;
-      }
-      if(data.list){
-        setDirList(data.list);
-        setViewType('dir');
-      }
+
+      axiosJWT.instance.get("/drive")
+        .then(function (response) {
+          if((response.status==200)&&(response.statusText=="OK")){
+            //console.log(response.data)
+            let data = response.data;
+            console.log(data);
+            if(data.error){
+              console.log('Fetch Error get dir list.')
+              return;
+            }
+            if(data.list){
+              setDirList(data.list);
+              setViewType('dir');
+            }
+
+            if(data.api=='BASE'){
+            }
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+        
     }else{
       DriveDirList(dirname)
     }
   }
 
   function typeTextContent(event){
-    //console.log(event.target.innerText);
-    //console.log(event.target.textContent);
-    //setTextContent(event.target.textContent);
-    //setTextContent(event.target.innerText);
+
     //setTextContent(event.currentTarget.textContent);
   }
 
@@ -142,21 +169,28 @@ export default function HyperDriveContent(){
   }
 
   async function getDrive(){
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-        mode:'drivekey'
-      })
+    axiosJWT.instance.post('/drive',{
+        api:API.TYPES.CREATE
+      , mode:'drivekey'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+        if(data.api=='drivekey'){
+          setDrive(data.key);
+          return;
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
-    if(data.api=='drivekey'){
-      setDrive(data.key);
-      return;
-    }
   }
 
   async function createDrive(){
@@ -180,55 +214,61 @@ export default function HyperDriveContent(){
   }
 
   async function clickEdit(filename){
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-          dirname:dirname
-        , file:filename
-        , mode:'edit'
-      })
+    axiosJWT.instance.post('/drive',{
+      dirname:dirname
+      , file:filename
+      , mode:'edit'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+        if(typeof data.content === 'string'){
+          setFile(filename);
+          setTextContent(data.content);
+          //contentEditable.current.innerText = data.content;
+          setViewType('texteditor');
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
-    if(typeof data.content === 'string'){
-      setFile(filename);
-      setTextContent(data.content);
-      //contentEditable.current.innerText = data.content;
-      setViewType('texteditor');
-    }
+
   }
 
   async function clickTextSave(){
-    //console.log("contentEditable.current.textContent");
-    //console.log(contentEditable.current.textContent);
-    console.log(contentEditable.current.innerHTML);
 
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-          dirname:dirname
-        , file:file
-        , content:contentEditable.current.innerText
-        , mode:'save'
-      })
+    axiosJWT.instance.post('/drive',{
+      dirname:dirname
+      , file:file
+      , content:contentEditable.current.innerText
+      , mode:'save'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+
+        setViewType('dir');
+        getDriveDir();
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
 
-    setViewType('dir');
-    getDriveDir();
-
-    //if(data.content){
-      //setFile(filename);
-      //setTextContent(data.content);
-      //setViewType('texteditor');
-    //}
   }
 // https://stackoverflow.com/questions/42300528/javascript-phps-substr-alternative-on-javascript
   async function clickTextCreate(){
@@ -242,28 +282,30 @@ export default function HyperDriveContent(){
       return;
     }
 
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-          dirname:dirname
-        , file:file
-        , content:contentEditable.current.innerText
-        , mode:'create'
-      })
+    axiosJWT.instance.post('/drive',{
+      dirname:dirname
+      , file:file
+      , content:contentEditable.current.innerText
+      , mode:'create'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+    
+        setViewType('dir');
+        getDriveDir();
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
 
-    setViewType('dir');
-    getDriveDir();
-    //if(data.content){
-      //setFile(filename);
-      //setTextContent(data.content);
-      //setViewType('texteditor');
-    //}
   }
 
   function clickEditCancel(event){
@@ -277,61 +319,89 @@ export default function HyperDriveContent(){
   }
 
   async function clickDeleteFile(filename){
-    let data = await useFetch('/drive',{
-        method:'DELETE'
-      , body:JSON.stringify({
-          dirname:dirname
+    axiosJWT.instance.delete("/drive",{
+      data:{
+        dirname:dirname
         , file:filename
         , mode:'delete'
-      })
+      }
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+    
+        setViewType('dir')
+        getDriveDir();
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
 
-    setViewType('dir')
-    getDriveDir();
   }
 
   async function clickMakeDir(){
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-        dirname:createDirName
-        , mode:'mkdir'
-      })
+    axiosJWT.instance.post('/drive',{
+      dirname:createDirName
+      , mode:'mkdir'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('axiosJWT Error!');
+          return;
+        }
+    
+        if(data.api=='UPDATE'){
+    
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
+
   }
 
   async function clickRemoveDir(){
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-        dirname:createDirName
-        , mode:'rmdir'
-      })
+
+    axiosJWT.instance.post('/drive',{
+      dirname:createDirName
+      , mode:'rmdir'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('axiosJWT Error!');
+          return;
+        }
+    
+        if(data.api=='UPDATE'){
+    
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      return;
-    }
+
   }
 
   function clickUpload(event){
     event.preventDefault();
     setViewType('upload');
-  }
-
-  function clickDeleteDir(){
-    
   }
 
   function changeFileSelect(event){
@@ -349,23 +419,31 @@ export default function HyperDriveContent(){
     const formData = new FormData();
     formData.append('File', selectedFile);
     formData.append('dirname', dirname);
-    fetch(
-			'/driveupload',
-			{
-				method: 'POST',
-				body: formData,
-			}
-		)
-			.then((response) => response.json())
-			.then((result) => {
-				console.log('Success:', result);
-        if(result.message=='uploaded'){
+    // need to check later for upload
+    // https://stackoverflow.com/questions/43013858/how-to-post-a-file-from-a-form-with-axios
+
+    axiosJWT.instance.post('/driveupload',formData,{
+      headers: {'Content-Type': 'multipart/form-data'}
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('axiosJWT Error!');
+          return;
+        }
+    
+        if(data.api=='uploaded'){
           setViewType('dir');
         }
-			})
-			.catch((error) => {
-				console.error('Error:', error);
-			});
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
   }
 
   function viewMode(){
@@ -452,22 +530,29 @@ export default function HyperDriveContent(){
   }
 
   async function DriveDirList(name){
-    let data = await useFetch('/drive',{
-        method:'POST'
-      , body:JSON.stringify({
-          dirname:name
-        , mode:'dir'
-      })
+    axiosJWT.instance.post('/drive',{
+        dirname:name
+      , mode:'dir'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          setDirList([]);
+          return;
+        }
+        if(data.list){
+          setDirList(data.list);
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-    console.log(data);
-    if(data.error){
-      console.log('Fetch Error get content data.')
-      setDirList([]);
-      return;
-    }
-    if(data.list){
-      setDirList(data.list);
-    }
+
   }
 
   function clickChangeDir(_dirname){
@@ -486,42 +571,44 @@ export default function HyperDriveContent(){
       DriveDirList(event.target.value);
     }
   }
-  // https://www.codegrepper.com/code-examples/javascript/download+file+from+url+in+react
-  // https://javascript.plainenglish.io/downloading-files-in-react-native-with-rnfetchblob-f78b18b46a36
-  async function clickDownloadTest(){
-    let fileURL = 'test.txt';
-    fetch('http://localhost/download/' + fileURL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    })
-    .then((response) => response.blob())
-    .then((blob) => {
-      // Create blob link to download
-      const url = window.URL.createObjectURL(
-        new Blob([blob]),
-      );
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute(
-        'download',
-        fileURL,
-      );
 
-      // Append to html link element page
-      document.body.appendChild(link);
-
-      // Start download
-      link.click();
-
-      // Clean up and remove the link
-      link.parentNode.removeChild(link);
-    });
-  }
-
+  // https://stackoverflow.com/questions/41938718/how-to-download-files-using-axios
   async function clickDownload(filename){
     let fileURL = dirname + filename;
+
+    axiosJWT.instance.get("/download"+ fileURL,{
+      responseType: 'blob', // important
+    })
+      .then(function (response) {
+        if((response.status==200)&&(response.statusText=="OK")){
+          //console.log(response.data)
+          let data = response.data;
+          console.log(data);
+          if(data.error){
+            console.log('axiosJWT Error!');
+            return;
+          }
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download',filename,);
+          //link.setAttribute('download',true,);
+          link.setAttribute('target','_blank');
+          // Append to html link element page
+          document.body.appendChild(link);
+          // Start download
+          link.click();
+          // Clean up and remove the link
+          link.parentNode.removeChild(link);
+
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    /*
     fetch('http://localhost/download' + fileURL, {
       method: 'GET',
       headers: {
@@ -551,6 +638,7 @@ export default function HyperDriveContent(){
       // Clean up and remove the link
       link.parentNode.removeChild(link);
     });
+    */
   }
   
   return <div>

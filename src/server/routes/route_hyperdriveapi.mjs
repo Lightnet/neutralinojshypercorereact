@@ -26,21 +26,29 @@ import { URL } from 'url';
 const __dirname = new URL('.', import.meta.url).pathname;
 
 const router = express.Router()
+
 const upload = multer()
 
 // define the about route
 router.get('/drive', async function (req, res) {
-  const drive = await getHyperDrive();
-  const list = await drive.promises.readdir('/');
-  res.json({dir:'/',list:list});
+  try{
+    const drive = await getHyperDrive();
+    console.log(drive);
+    const list = await drive.promises.readdir('/');
+    res.json({dir:'/',list:list});
+  }catch(e){
+    console.log(e);
+    res.json({error:'error'});
+  }
+  
 })
-/*
+
 // https://github.com/hypercore-protocol/hyperdrive
-var stat = drive.stat('/hello.txt')
-stat.isDirectory()
-stat.isFile()
-stat.isSymlink()
-*/
+//var stat = drive.stat('/hello.txt')
+//stat.isDirectory()
+//stat.isFile()
+//stat.isSymlink()
+
 
 router.post('/drive', async function (req, res) {
   const drive = await getHyperDrive();
@@ -215,21 +223,6 @@ router.post('/driveupload', upload.single('File'),async function (req, res) {
 
   return res.json({error:"error"});
 })
-
-/*
-router.get('/drive/:name',async function (req, res) {
-  
-  const drive = await getHyperDrive();
-  console.log(req.params)
-  console.log(req.body)
-  let name = req.name
-  console.log(name)
-  console.log('Request URL:', req.originalUrl)
-
-  //const content = await drive.promises.readFile(filepath, 'utf-8')
-  res.send('Hello ' + req.name + '!');
-})
-*/
 
 var re = /(?:\.([^.]+))?$/;
 

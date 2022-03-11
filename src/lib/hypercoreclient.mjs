@@ -6,10 +6,18 @@
 //const { Client: HyperspaceClient } = require('hyperspace');
 //const Hyperdrive = require('hyperdrive');
 
-import { Client as HyperspaceClient } from "hyperspace";
+//import { Client as HyperspaceClient } from "hyperspace";
 import Hyperdrive from "hyperdrive";
+//import path,{ dirname } from 'path';
+//import { fileURLToPath } from 'url';
+//const __dirname = dirname(fileURLToPath(import.meta.url));
+//console.log(__dirname);
 
-var hyperClient;
+
+//const projectdir = path.join(__dirname,"../../my-hyperdrive");
+//console.log(projectdir);
+
+//var hyperClient;
 //var coreStore;
 
 // https://hypercore-protocol.github.io/new-website/guides/hyperspace/corestore/
@@ -21,7 +29,7 @@ var hyperClient;
 const newCore = corestore.get() // create a new hypercore
 const existingCore = corestore.get(key) // get an existing hypercore
 */
-
+/*
 export async function getHyperClient(){
 
   if(hyperClient){
@@ -81,11 +89,14 @@ export async function getHyperClient(){
 
   return hyperClient;
 }
+*/
 
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-export const drive = new Hyperdrive('./my-hyperdrive') // content will be stored in this folder
+//export const drive = new Hyperdrive(path.join(__dirname,"../../my-hyperdrive")) // content will be stored in this folder
+export const drive = new Hyperdrive("./my-hyperdrive") // content will be stored in this folder
 //const drive='test';
+
 /*
 drive.ready(err => {
   if (err) throw err
@@ -98,12 +109,17 @@ drive.ready(err => {
 })
 */
 
+
 // main access current folder
 // https://hypercore-protocol.org/guides/modules/hyperdrive/
 export async function getHyperDrive(){
   //console.log(drive);
   //console.log('my drive');
   //return 'test HDrive';
+  //await drive.ready();
+  // if you prefer promises you can use:
+  await drive.promises.ready()
+
   return drive;
 }
 
