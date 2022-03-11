@@ -11,9 +11,7 @@
 import React,{createRef, useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
 import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
-//import useFetch from '../hook/useFetch.mjs';
-//import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
-//import ContentEditable from "react-contenteditable";
+import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
 import styles from './editor.module.css';
 
 var re = /(?:\.([^.]+))?$/;
@@ -86,16 +84,15 @@ export default function HyperDriveContent(){
   const [selectedFile, setSelectedFile] = useState();
   const [isSelected,setIsSelected] = useState(false);
 
-  //const {API_URL} = useHyperCore();
+  const {API_URL} = useHyperCore();
 
   const [axiosJWT, isLoading] = useAxiosTokenAPI();
 
-
   useEffect(()=>{
-    console.log("axiosJWT init...");
-    console.log("isLoading: ", isLoading)
+    //console.log("axiosJWT init...");
+    //console.log("isLoading: ", isLoading)
     if((typeof axiosJWT?.instance=="function")&&(isLoading == false)){
-      console.log("GETTING...: ")
+      //console.log("GETTING...: ")
       getDriveDir()
     }
   },[axiosJWT,isLoading])
@@ -131,7 +128,7 @@ export default function HyperDriveContent(){
   async function getDriveDir(){
     if(dirname=='/'){
 
-      axiosJWT.instance.get("/drive")
+      axiosJWT.instance.get("/api/hyperdrive")
         .then(function (response) {
           if((response.status==200)&&(response.statusText=="OK")){
             //console.log(response.data)
@@ -169,7 +166,7 @@ export default function HyperDriveContent(){
   }
 
   async function getDrive(){
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
         api:API.TYPES.CREATE
       , mode:'drivekey'
     })
@@ -204,9 +201,9 @@ export default function HyperDriveContent(){
   function viewImage(_filename){
     let tmpFile = _filename;
     if(dirname == "/"){
-      tmpFile = "http://localhost/drive/" + tmpFile;
+      tmpFile = "http://localhost/hyperdrive/" + tmpFile;
     }else{
-      tmpFile = "http://localhost/drive" + dirname + "/" + tmpFile;
+      tmpFile = "http://localhost/hyperdrive" + dirname + "/" + tmpFile;
     }
 
     setImageFile(tmpFile);
@@ -214,7 +211,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickEdit(filename){
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
       dirname:dirname
       , file:filename
       , mode:'edit'
@@ -244,7 +241,7 @@ export default function HyperDriveContent(){
 
   async function clickTextSave(){
 
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
       dirname:dirname
       , file:file
       , content:contentEditable.current.innerText
@@ -282,7 +279,7 @@ export default function HyperDriveContent(){
       return;
     }
 
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
       dirname:dirname
       , file:file
       , content:contentEditable.current.innerText
@@ -319,7 +316,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickDeleteFile(filename){
-    axiosJWT.instance.delete("/drive",{
+    axiosJWT.instance.delete("/api/hyperdrive",{
       data:{
         dirname:dirname
         , file:filename
@@ -347,7 +344,7 @@ export default function HyperDriveContent(){
   }
 
   async function clickMakeDir(){
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
       dirname:createDirName
       , mode:'mkdir'
     })
@@ -374,7 +371,7 @@ export default function HyperDriveContent(){
 
   async function clickRemoveDir(){
 
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
       dirname:createDirName
       , mode:'rmdir'
     })
@@ -422,7 +419,7 @@ export default function HyperDriveContent(){
     // need to check later for upload
     // https://stackoverflow.com/questions/43013858/how-to-post-a-file-from-a-form-with-axios
 
-    axiosJWT.instance.post('/driveupload',formData,{
+    axiosJWT.instance.post('/api/hyperdriveupload',formData,{
       headers: {'Content-Type': 'multipart/form-data'}
     })
     .then(function (response) {
@@ -465,11 +462,11 @@ export default function HyperDriveContent(){
           if(checkTextExt(item)==true){
             bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
             bdowload=<button onClick={()=>clickDownload(item)}>Download</button>
-            bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} >Download</a>
+            bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
             bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
           }
           if(checkImageExt(item)==true){
-            //bimg=<img src={"http://localhost/drive"+"/"+item} />
+            //bimg=<img src={"http://localhost/hyperdrive"+"/"+item} />
             bimg=<button onClick={()=>viewImage(item)}> View Image </button>
           }
         }else{
@@ -485,6 +482,8 @@ export default function HyperDriveContent(){
     }else if(viewType=='texteditor'){
 
       return <>
+        <label> File Name: {file} </label><button onClick={clickTextSave}> Save </button>
+        <button onClick={clickEditCancel}> Cancel </button>
         <div
           ref={contentEditable}
           className={styles.textEditor}
@@ -492,15 +491,14 @@ export default function HyperDriveContent(){
           onInput={typeTextContent}
           contentEditable={true}
           >
-            
-          </div><br />
-        <button onClick={clickTextSave}> Save </button>
-        <button onClick={clickEditCancel}> Cancel </button>
+          </div>
+        
       </>
     }else if(viewType=='editortextnew'){
       return <>
-        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} /><br />
-        <label> Text Content: </label> <br />
+        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} />
+        <button onClick={clickTextCreate}> Save </button>
+        <button onClick={clickEditCancel}> Cancel </button><br/>
         <div 
           ref={contentEditable}
           className={styles.textEditor} 
@@ -510,8 +508,7 @@ export default function HyperDriveContent(){
           >
             {textContent}
         </div><br />
-        <button onClick={clickTextCreate}> Save </button>
-        <button onClick={clickEditCancel}> Cancel </button>
+        
       </>
     }else if(viewType=='image'){
       return <>
@@ -530,7 +527,7 @@ export default function HyperDriveContent(){
   }
 
   async function DriveDirList(name){
-    axiosJWT.instance.post('/drive',{
+    axiosJWT.instance.post('/api/hyperdrive',{
         dirname:name
       , mode:'dir'
     })
@@ -574,9 +571,14 @@ export default function HyperDriveContent(){
 
   // https://stackoverflow.com/questions/41938718/how-to-download-files-using-axios
   async function clickDownload(filename){
-    let fileURL = dirname + filename;
-
-    axiosJWT.instance.get("/download"+ fileURL,{
+    let fileURL="";
+    if(dirname == "/"){
+      fileURL = dirname + filename;
+    }else{
+      fileURL = dirname +"/"+ filename;
+    }
+    
+    axiosJWT.instance.get("/api/download"+ fileURL,{
       responseType: 'blob', // important
     })
       .then(function (response) {
@@ -641,7 +643,10 @@ export default function HyperDriveContent(){
     */
   }
   
-  return <div>
+  return <div style={{
+    width:"100%",
+    height:"100%"
+    }}>
     <div>
       <button onClick={clickRefresh}> Refresh </button>
       <button onClick={createDrive}> Create </button>
@@ -659,7 +664,10 @@ export default function HyperDriveContent(){
     <div>
       <label> Directory </label><input size="64" value={dirname} onChange={typeDirName} onKeyUp={typeDirEnter} />
     </div>
-    <div>
+    <div style={{
+      width:"100%",
+      height:"calc(100% - 74px)"
+      }}>
       {viewMode()}
     </div>
   

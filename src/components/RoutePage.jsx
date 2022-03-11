@@ -20,8 +20,8 @@ export default function RoutePage(){
     <Routes>
       <Route index element={<HomePage />} />
       <Route path="/about" element={<AboutPage />} />
-      <Route path="/drive/*" element={<HyperDriveContent />} />
-      <Route path="/bee/*" element={<HyperBeeContent />} />
+      <Route path="/hyperdrive/*" element={<HyperDriveContent />} />
+      <Route path="/hyperbee/*" element={<HyperBeeContent />} />
       <Route path="/texteditor" element={<TextEditorPage />} />
     </Routes>
   </div>

@@ -30,10 +30,10 @@ const router = express.Router()
 const upload = multer()
 
 // define the about route
-router.get('/drive', async function (req, res) {
+router.get('/hyperdrive', async function (req, res) {
   try{
     const drive = await getHyperDrive();
-    console.log(drive);
+    //console.log(drive);
     const list = await drive.promises.readdir('/');
     res.json({dir:'/',list:list});
   }catch(e){
@@ -50,7 +50,7 @@ router.get('/drive', async function (req, res) {
 //stat.isSymlink()
 
 
-router.post('/drive', async function (req, res) {
+router.post('/hyperdrive', async function (req, res) {
   const drive = await getHyperDrive();
   let data = req.body;
   console.log(data);
@@ -170,7 +170,7 @@ router.post('/drive', async function (req, res) {
   //res.send(JSON.stringify({meesage:'test'}));
 })
 
-router.put('/drive', async function (req, res) {
+router.put('/hyperdrive', async function (req, res) {
   //console.log(getHyperDrive())
   //await getHyperClient();
   const drive = await getHyperDrive();
@@ -179,7 +179,7 @@ router.put('/drive', async function (req, res) {
   res.json({meesage:'test'});
 })
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-router.delete('/drive', async function (req, res) {
+router.delete('/hyperdrive', async function (req, res) {
   const drive = await getHyperDrive();
   let data = req.body;
   //console.log('delete....')
@@ -196,7 +196,7 @@ router.delete('/drive', async function (req, res) {
   res.json({meesage:'delete'});
 })
 
-router.post('/driveupload', upload.single('File'),async function (req, res) {
+router.post('/hyperdriveupload', upload.single('File'),async function (req, res) {
   
   const drive = await getHyperDrive();
   console.log('test////')
@@ -226,7 +226,7 @@ router.post('/driveupload', upload.single('File'),async function (req, res) {
 
 var re = /(?:\.([^.]+))?$/;
 
-router.get('/drive/:key/*',async function (req, res) {
+router.get('/hyperdrive/:key/*',async function (req, res) {
   
   const drive = await getHyperDrive();
   console.log(req.params)
@@ -282,33 +282,38 @@ router.get('/drive/:key/*',async function (req, res) {
   //res.send('Hello ' + req.name + '!');
 })
 
-router.get('/drive/:key',async function (req, res) {
+router.get('/hyperdrive/:key',async function (req, res) {
   
   //const drive = await getHyperDrive();
   console.log(req.params)
   //console.log('Request URL:', req.originalUrl)
 
   var ext = re.exec(req.params.key)[1];
-  if(ext){
-    console.log('File >>?')
-    const drive = await getHyperDrive();
-    //const content = await drive.promises.readFile(req.params.key)
-    const content = await drive.promises.readFile(req.params.key,'binary')
-    //const content = await drive.promises.readFile(req.params.key, 'hex')
-    const mimetype = express.static.mime.lookup(req.params.key);
-    //console.log(mimetype)
-    res.setHeader('Content-type', mimetype);
-    return res.end(content);
-    //return res.send(content);
-  }else{
-    //drive key?
-    // need to have key id local and server check for this...
-    //console.log('KEY?')
-    const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
-    const list = await drive.promises.readdir("/");
-    //console.log(list);
-    drive.close();
-    return res.json({dir:"/",list:list});
+  try{
+    if(ext){
+      console.log('File >>?')
+      const drive = await getHyperDrive();
+      //const content = await drive.promises.readFile(req.params.key)
+      const content = await drive.promises.readFile(req.params.key,'binary')
+      //const content = await drive.promises.readFile(req.params.key, 'hex')
+      const mimetype = express.static.mime.lookup(req.params.key);
+      //console.log(mimetype)
+      res.setHeader('Content-type', mimetype);
+      return res.end(content);
+      //return res.send(content);
+    }else{
+      //drive key?
+      // need to have key id local and server check for this...
+      //console.log('KEY?')
+      const drive = new Hyperdrive('./my-hyperdrive',req.params.key);
+      const list = await drive.promises.readdir("/");
+      //console.log(list);
+      drive.close();
+      return res.json({dir:"/",list:list});
+    }
+  }catch(e){
+    console.log(e)
+    return res.end('error');
   }
   res.send('!');
 })
@@ -318,19 +323,25 @@ router.get('/drive/:key',async function (req, res) {
 router.get('/download/*',async function (req, res) {
   const drive = await getHyperDrive();
   var ext = re.exec(req.params[0])[1];
+  console.log(req.params)
 
   if(ext){
-    const content = await drive.promises.readFile(req.params[0], 'utf-8')
-    const filename = path.basename(req.params[0]);
-    console.log(filename)
-    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+    try{
+      const content = await drive.promises.readFile(req.params[0], 'utf-8')
+      const filename = path.basename(req.params[0]);
+      console.log(filename)
+      res.setHeader('Content-disposition', 'attachment; filename=' + filename);
 
-    const mimetype = express.static.mime.lookup(req.params[0]);
-    console.log(mimetype)
-    res.setHeader('Content-type', mimetype);
+      const mimetype = express.static.mime.lookup(req.params[0]);
+      console.log(mimetype)
+      res.setHeader('Content-type', mimetype);
 
-    //res.setHeader('content-type', 'text/plain');//works
-    return res.end(content);
+      //res.setHeader('content-type', 'text/plain');//works
+      return res.end(content);
+    }catch(e){
+      console.log(e);
+      return res.end('error');
+    }
   }
   return res.end('error');
 })

@@ -5,6 +5,7 @@
 // https://dev.to/deboragaleano/how-to-handle-multiple-inputs-in-react-55el
 
 import React, { useEffect, useState } from "react";
+import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
 import useFetch from "../hook/useFetch.mjs";
 
 export default function HyperBeeContent(){
@@ -15,25 +16,42 @@ export default function HyperBeeContent(){
   const [beeDB, setBeeDB] = useState([]);
   const [viewType, setViewType] = useState('db');
 
+  const [axiosJWT, isLoading] = useAxiosTokenAPI();
+
   useEffect(()=>{
-    getBeeDB();
-  },[]);
+    console.log("axiosJWT init...");
+    console.log("isLoading: ", isLoading)
+    if((typeof axiosJWT?.instance=="function")&&(isLoading == false)){
+      console.log("GETTING...: ")
+      getBeeDB();
+    }
+  },[axiosJWT,isLoading])
+
+  //useEffect(()=>{
+    //getBeeDB();
+  //},[]);
 
   async function getBeeDB(){
-    //if(dirname=='/'){
-      let data = await useFetch('http://localhost/bee');
-      console.log(data);
-      if(data.error){
-        console.log('Fetch Error get dir list.')
-        return;
-      }
-      if(data.list){
-        setBeeDB(data.list);
-        setViewType('db');
-      }
-    //}else{
-      //DriveDirList(dirname)
-    //}
+    axiosJWT.instance.get("/api/hyperbee")
+      .then(function (response) {
+        if((response.status==200)&&(response.statusText=="OK")){
+          //console.log(response.data)
+          let data = response.data;
+          console.log(data);
+          if(data.error){
+            console.log('Fetch Error get dir list.')
+            return;
+          }
+          if(data.list){
+            setBeeDB(data.list);
+            setViewType('db');
+          }
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
   }
 
   function typeHyperbeeID(event){
@@ -45,20 +63,29 @@ export default function HyperBeeContent(){
   }
 
   async function clickGetHyperbee(){
-    let data = await useFetch('http://localhost/bee',{
-      method:'POST',
-      body:JSON.stringify({api:'key'})
+    axiosJWT.instance.post('/api/hyperbee',{
+      api:'key'
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+        if(data.api=='key'){
+          console.log(data.api)
+          console.log(data.key)
+          setHyperbeeID(data.key);
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
     });
-      console.log(data);
-      if(data.error){
-        console.log('Fetch Error get dir list.')
-        return;
-      }
-      if(data.api=='key'){
-        console.log(data.api)
-        console.log(data.key)
-        setHyperbeeID(data.key);
-      }
+
   }
 
   function viewRender(){

@@ -14,11 +14,15 @@
 import express from "express";
 import routes from "./routes.mjs";
 import cors from "cors";
+import chalk from "chalk"
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST ;
 
 async function main(){
   const app = express()
+
+  app.set('trust proxy', true)
 
   /*
   const server = new HyperspaceServer({
@@ -51,8 +55,16 @@ async function main(){
 
   app.use("/",routes)
   
-  app.listen(PORT, () => {
-    console.log(`web server listen http://localhost:${PORT}`)
+  var server = app.listen(PORT, () => {
+    console.log("PORT:",PORT)
+    console.log("HOST:",HOST)
+    //console.log(app)
+    console.log("env:",app.settings.env)
+    var host = server.address().address;
+    var port = server.address().port;
+    console.log(server.address())
+    //console.log('Running at http://' + host + ':' + port)
+    console.log(chalk.yellow(`Express Web Server listen `), chalk.green(`http://localhost:${PORT}`))
   })
 
   return app;

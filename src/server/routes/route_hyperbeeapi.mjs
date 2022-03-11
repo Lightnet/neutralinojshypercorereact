@@ -41,7 +41,7 @@ const db = new Hyperbee(core, {
 //}
 //console.log(db.feed.key.toString('hex'));
 
-router.get('/bee', async function (req, res) {
+router.get('/hyperbee', async function (req, res) {
   //const list = await drive.promises.readdir('/');
   await db.ready()
   //console.log(db.key);
@@ -55,7 +55,7 @@ router.get('/bee', async function (req, res) {
   res.json({bee:'',list:list});
 })
 
-router.post('/bee', async function (req, res) {
+router.post('/hyperbee', async function (req, res) {
   //const list = await drive.promises.readdir('/');
   await db.ready()
   let data = req.body;
