@@ -10,8 +10,8 @@ import {
 } from "react-router-dom";
 import AboutPage from "./about/AboutPage.jsx";
 import HomePage from "./home/HomePage.jsx";
-import HyperBeeContent from "./hyper/HyperBeeContent.jsx";
-import HyperDriveContent from "./hyper/HyperDriveContent.jsx";
+import HyperBeeContent from "./hyperbee/HyperBeeContent.jsx";
+import HyperDriveContent from "./hyperdrive/HyperDriveContent.jsx";
 import TextEditorPage from "./texteditor/TextEditorPage.jsx";
 
 export default function RoutePage(){

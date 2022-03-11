@@ -62,10 +62,10 @@
   - api for drive access, upload, download and other functions calls.
 
 # Layout:
-Home | About | Drive | Text Editor | Upload
+Home | HyperDrive | HyperBee | Text Editor |
 
 
-## Drive:
+## HyperDrive:
 
 ```
 Refresh (reload current dirname) | Create (not added) | Get (drive id) |
@@ -76,11 +76,11 @@ Dir List Map
 
 ```
 
-### Drive Urls:(work in progress)
+### HypedDrive Urls:(work in progress)
 ```
-http://localhost/drive/filename.txt <-local drive
-http://localhost/drive/testfolder/filename.txt <-local drive with folder
-http://localhost/drive/000000.../filename.txt <- key drive with file
+http://localhost/hyperdrive/filename.txt <-local drive
+http://localhost/hyperdrive/testfolder/filename.txt <-local drive with folder
+http://localhost/hyperdrive/000000.../filename.txt <- key drive with file
 ```
   It need to check if there key or file that be loaded. One for access to local drive and other is key drive.
 
@@ -104,6 +104,14 @@ npm install
 
 npm run devweb
 ```
+
+## vite web app
+```
+npm install
+
+npm run devv
+```
+  To update the react component real time debug.
 
 # Dev:
 ```

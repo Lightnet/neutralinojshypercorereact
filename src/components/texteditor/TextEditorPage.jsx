@@ -36,8 +36,6 @@ export default function TextEditorPage(){
   const [showGutter, setShowGutter] = useState(true);
   const [highlightActiveLine, setHighlightActiveLine] = useState(true);
 
-
-
   const [content, setContent] = useState(`sdfdf`);
   const aceRef = createRef(null);
 

@@ -12,7 +12,7 @@ import React,{createRef, useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
 import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
 import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
-import styles from './editor.module.css';
+//import styles from './editor.module.css';
 
 var re = /(?:\.([^.]+))?$/;
 
