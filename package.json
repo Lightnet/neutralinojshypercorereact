@@ -26,6 +26,7 @@
   "license": "ISC",
   "dependencies": {
     "@blueprintjs/core": "^4.0.0-rc.0",
+    "@blueprintjs/popover2": "^0.13.0",
     "@vitejs/plugin-react": "^1.2.0",
     "axios": "^0.26.1",
     "body-parser": "^1.19.2",
@@ -39,6 +40,7 @@
     "hyperbee": "^1.7.0",
     "hyperdrive": "^10.21.0",
     "jsonwebtoken": "^8.5.1",
+    "lodash-es": "^4.17.21",
     "multer": "^1.4.4",
     "nanoid": "^3.3.1",
     "nodemon": "^2.0.15",

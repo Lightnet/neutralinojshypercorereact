@@ -6,12 +6,14 @@
 
 // https://github.com/neutralinojs/neutralinojs/blob/main/server/router.cpp
 // https://stackoverflow.com/questions/680929/how-to-extract-extension-from-filename-string-in-javascript/680982
-// s
+// 
 
+import { Button, Classes } from "@blueprintjs/core";
 import React,{createRef, useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
 import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
 import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
+import HyperDriveTextEditor from "../texteditor/HyperDriveTextEditor.jsx";
 //import styles from './editor.module.css';
 
 var re = /(?:\.([^.]+))?$/;
@@ -80,6 +82,7 @@ export default function HyperDriveContent(){
   const [imageFile,setImageFile] = useState('');
   const [textContent,setTextContent] = useState("");
   const contentEditable = createRef(null);
+  const [textEditor, setTextEditor] = useState("");
 
   const [selectedFile, setSelectedFile] = useState();
   const [isSelected,setIsSelected] = useState(false);
@@ -105,10 +108,12 @@ export default function HyperDriveContent(){
   //event for text editor set up
   useEffect(()=>{
     if(viewType=='texteditor'){
-      contentEditable.current.innerText = textContent;
+      //contentEditable.current.innerText = textContent;
+      setTextEditor(textContent);
     }
     if(viewType=='editortextnew'){
-      contentEditable.current.innerText = textContent;
+      //contentEditable.current.innerText = textContent;
+      setTextEditor(textContent);
     }
   },[viewType])
 
@@ -156,9 +161,9 @@ export default function HyperDriveContent(){
     }
   }
 
-  function typeTextContent(event){
-
-    //setTextContent(event.currentTarget.textContent);
+  function typeTextEditor(newValue){
+    console.log(newValue)
+    setTextEditor(newValue)
   }
 
   function typeFile(event){
@@ -244,7 +249,7 @@ export default function HyperDriveContent(){
     axiosJWT.instance.post('/api/hyperdrive',{
       dirname:dirname
       , file:file
-      , content:contentEditable.current.innerText
+      , content:textEditor
       , mode:'save'
     })
     .then(function (response) {
@@ -282,7 +287,7 @@ export default function HyperDriveContent(){
     axiosJWT.instance.post('/api/hyperdrive',{
       dirname:dirname
       , file:file
-      , content:contentEditable.current.innerText
+      , content:textEditor
       , mode:'create'
     })
     .then(function (response) {
@@ -460,17 +465,17 @@ export default function HyperDriveContent(){
         checkTextExt(item);
         if(ext){
           if(checkTextExt(item)==true){
-            bedit=<button onClick={()=>clickEdit(item)}>Edit</button>
-            bdowload=<button onClick={()=>clickDownload(item)}>Download</button>
+            bedit=<Button icon="edit" small onClick={()=>clickEdit(item)}>Edit</Button>
+            bdowload=<Button icon="download" small onClick={()=>clickDownload(item)}>Download</Button>
             bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
-            bdelete=<button onClick={()=>clickDeleteFile(item)}> Delete </button>
+            bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
           }
           if(checkImageExt(item)==true){
             //bimg=<img src={"http://localhost/hyperdrive"+"/"+item} />
-            bimg=<button onClick={()=>viewImage(item)}> View Image </button>
+            bimg=<Button small onClick={()=>viewImage(item)}> View Image </Button>
           }
         }else{
-          bcd = <button onClick={()=>clickChangeDir(item)}>Dir</button>
+          bcd = <Button icon="folder-close" small onClick={()=>clickChangeDir(item)}>Directory</Button>
         }
         
         //console.log("NAME:",item)
@@ -482,32 +487,23 @@ export default function HyperDriveContent(){
     }else if(viewType=='texteditor'){
 
       return <>
-        <label> File Name: {file} </label><button onClick={clickTextSave}> Save </button>
-        <button onClick={clickEditCancel}> Cancel </button>
-        <div
-          ref={contentEditable}
-          className={styles.textEditor}
-          suppressContentEditableWarning={true}
-          onInput={typeTextContent}
-          contentEditable={true}
-          >
-          </div>
-        
+        <label> File Name: {file} </label>
+        <Button icon="saved" small onClick={clickTextSave}> Save </Button>
+        <Button icon="cross" small onClick={clickEditCancel}> Cancel </Button>
+        <HyperDriveTextEditor
+          value={textEditor}
+          onChange={typeTextEditor}
+        />
       </>
     }else if(viewType=='editortextnew'){
       return <>
-        <label> File Name: </label> <input size="64" value={file} onChange={typeFile} />
-        <button onClick={clickTextCreate}> Save </button>
-        <button onClick={clickEditCancel}> Cancel </button><br/>
-        <div 
-          ref={contentEditable}
-          className={styles.textEditor} 
-          suppressContentEditableWarning={true}
-          //dangerouslySetInnerHTML={{ __html: textContent }}
-          contentEditable={true}
-          >
-            {textContent}
-        </div><br />
+        <label> File Name: </label> <input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={file} onChange={typeFile} />
+        <Button icon="saved" onClick={clickTextCreate}> Save </Button>
+        <Button icon="cross" onClick={clickEditCancel}> Cancel </Button><br/>
+        <HyperDriveTextEditor
+          value={textEditor}
+          onChange={typeTextEditor}
+        />
         
       </>
     }else if(viewType=='image'){
@@ -519,8 +515,8 @@ export default function HyperDriveContent(){
       return <>
         <label> File Name: </label>
         <input type="file" name="file" onChange={changeFileSelect} />
-        <button onClick={clickUploadHandle}> Upload </button>
-        <button onClick={clickEditCancel}> Cancel </button>
+        <Button icon="upload"  small onClick={clickUploadHandle}> Upload </Button>
+        <Button icon="cross" small onClick={clickEditCancel}> Cancel </Button>
       </>
     }
     return <></>
@@ -610,63 +606,32 @@ export default function HyperDriveContent(){
         console.log(error);
       });
 
-    /*
-    fetch('http://localhost/download' + fileURL, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-    })
-    .then((response) => response.blob())
-    .then((blob) => {
-      // Create blob link to download
-      const url = window.URL.createObjectURL(
-        new Blob([blob]),
-      );
-      const link = document.createElement('a');
-      link.href = url;
-      
-      link.setAttribute('download',filename,);
-      
-      //link.setAttribute('download',true,);
-      link.setAttribute('target','_blank');
-
-      // Append to html link element page
-      document.body.appendChild(link);
-
-      // Start download
-      link.click();
-
-      // Clean up and remove the link
-      link.parentNode.removeChild(link);
-    });
-    */
   }
   
   return <div style={{
     width:"100%",
-    height:"100%"
+    height:"calc(100% - 18px)"
     }}>
     <div>
-      <button onClick={clickRefresh}> Refresh </button>
-      <button onClick={createDrive}> Create </button>
-      <button onClick={getDrive}> Get </button>
-      <input size="64" value={drive} onChange={typeDrive}/>
+      <Button icon="refresh" small onClick={clickRefresh}> Refresh </Button>
+      <Button icon="build" small onClick={createDrive}> Create </Button>
+      <Button icon="key" small onClick={getDrive}> Get </Button>
+      <input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={drive} onChange={typeDrive} placeholder="Default local drive" />
     </div>
     <div>
-      <button onClick={clickEditNew}> New Text File </button>
-      <button onClick={clickUpload}> Upload </button>
-      <button onClick={clickMakeDir}> mkdir </button>
-      <button onClick={clickRemoveDir}> rmdir </button>
-      <input size="64" value={createDirName} onChange={typeCreateDirName}></input>
+      <Button icon="document" small onClick={clickEditNew}> New Text File </Button>
+      <Button icon="upload" small onClick={clickUpload}> Upload </Button>
+      <Button icon="folder-new" small onClick={clickMakeDir}> mkdir </Button>
+      <Button icon="remove" small onClick={clickRemoveDir}> rmdir </Button>
+      <input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={createDirName} onChange={typeCreateDirName}></input>
     </div>
     
     <div>
-      <label> Directory </label><input size="64" value={dirname} onChange={typeDirName} onKeyUp={typeDirEnter} />
+      <label> Directory </label><input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={dirname} onChange={typeDirName} onKeyUp={typeDirEnter} />
     </div>
     <div style={{
       width:"100%",
-      height:"calc(100% - 74px)"
+      height:"calc(100% - 72px)"
       }}>
       {viewMode()}
     </div>

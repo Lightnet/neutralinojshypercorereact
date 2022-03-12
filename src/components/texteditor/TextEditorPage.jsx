@@ -107,9 +107,9 @@ export default function TextEditorPage(){
         <option value={"terminal"}>terminal</option>
         <option value={"twilight"}>twilight</option>
       </select>
-      <button onClick={(e)=>setShowPrintMargin(state=>!state)}>Print Margin {showPrintMargin ? ("x"):("o")}</button>
-      <button onClick={(e)=>setShowGutter(state=>!state)}>Gutter {showGutter ? ("x"):("o")}</button>
-      <button onClick={(e)=>setHighlightActiveLine(state=>!state)}> Highlight Active Line {highlightActiveLine ? ("x"):("o")}</button>
+      <Button small  onClick={(e)=>setShowPrintMargin(state=>!state)}>Print Margin {showPrintMargin ? ("x"):("o")}</Button>
+      <Button small  onClick={(e)=>setShowGutter(state=>!state)}>Gutter {showGutter ? ("x"):("o")}</Button>
+      <Button small  onClick={(e)=>setHighlightActiveLine(state=>!state)}> Highlight {highlightActiveLine ? ("x"):("o")}</Button>
 
     </div>
     <AceEditorRef
