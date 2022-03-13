@@ -4,9 +4,10 @@
 */
 
 import React from "react";
-import HyperDriveContent from "../components/hyperdrive/HyperDriveContent";
+import HyperDrive2 from "../components/hyperdrive/HyperDrive2";
+//import HyperDriveContent from "../components/hyperdrive/HyperDriveContent";
 
 export default function HyperDrive() {
 
-  return (<HyperDriveContent/>)
+  return (<HyperDrive2/>)
 }

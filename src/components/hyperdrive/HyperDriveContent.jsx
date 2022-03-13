@@ -172,8 +172,8 @@ export default function HyperDriveContent(){
 
   async function getDrive(){
     axiosJWT.instance.post('/api/hyperdrive',{
-        api:API.TYPES.CREATE
-      , mode:'drivekey'
+        //api:API.TYPES.CREATE
+      mode:'drivekey'
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){

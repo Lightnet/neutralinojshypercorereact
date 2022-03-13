@@ -14,12 +14,18 @@ import Hyperdrive from "hyperdrive";
 
 import { isEmpty } from "../../lib/helper.mjs";
 import { getHyperDrive } from "../../lib/hypercoreclient.mjs";
-import { URL } from 'url';
-const __dirname = new URL('.', import.meta.url).pathname;
+//import { URL } from 'url';
+import { API } from "../../components/hypercore/API.mjs";
+//const __dirname = new URL('.', import.meta.url).pathname;
 
 const router = express.Router()
-
 const upload = multer()
+
+// https://github.com/hypercore-protocol/hyperdrive
+//var stat = drive.stat('/hello.txt')
+//stat.isDirectory()
+//stat.isFile()
+//stat.isSymlink()
 
 // define the about route
 router.get('/hyperdrive', async function (req, res) {
@@ -32,25 +38,17 @@ router.get('/hyperdrive', async function (req, res) {
     console.log(e);
     res.json({error:'error'});
   }
-  
 })
-
-// https://github.com/hypercore-protocol/hyperdrive
-//var stat = drive.stat('/hello.txt')
-//stat.isDirectory()
-//stat.isFile()
-//stat.isSymlink()
-
 
 router.post('/hyperdrive', async function (req, res) {
   const drive = await getHyperDrive();
   let data = req.body;
   console.log(data);
   // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
-  if(data.mode=='dir'){
+  if(data.api==API.DRIVETYPES.DIR){
     try{
       const stat = await drive.promises.stat(data.dirname)
-      console.log(stat);
+      //console.log(stat);
       //console.log("stat.isDirectory()")
       //console.log(stat.isDirectory())
       //console.log(stat.isFile())
@@ -58,6 +56,9 @@ router.post('/hyperdrive', async function (req, res) {
       if(stat.isDirectory() == true){
         console.log("Found Directory()");
         const list = await drive.promises.readdir(data.dirname);
+
+
+
         console.log(list);
         return res.json({dir:data.dirname,list:list});
       }
@@ -69,36 +70,15 @@ router.post('/hyperdrive', async function (req, res) {
     }
   }
 
-  if(data.mode=='edit'){
-    let filepath = path.join(data.dirname,data.file)
-    filepath = filepath.replaceAll("\\" , "/");
-    const content = await drive.promises.readFile(filepath, 'utf-8')
-    return res.json({file:data.file,content:content});
-  }
-
-  if(data.mode=='save'){
-    //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
-    //var test = path.join("/test",data.file)
-    //console.log("test...");
-    //console.log(test);
-    let filepath = path.join(data.dirname,data.file)
-    filepath = filepath.replaceAll("\\" , "/");
-    await drive.promises.writeFile(filepath, data.content)
-    return res.json({message:'save'});
-  }
-
-  if(data.mode=='create'){
-    console.log(data.dirname)
-    console.log(data.file)
-    try{
-      if(isEmpty(data.file)||isEmpty(data.dirname)){
-        return res.json({error:'file name empty'});
-      }
+  if(data.api==API.DRIVETYPES.WRITE){ 
+    if(isEmpty(data.file)||isEmpty(data.dirname)||isEmpty(data.content)){
+      return res.json({error:'file name empty'});
+    }
+    try{ 
       let filepath = path.join(data.dirname,data.file)
       filepath = filepath.replaceAll("\\" , "/");
       await drive.promises.writeFile(filepath, data.content)
-      
-      return res.json({message:'create'});
+      return res.json({api:API.DRIVETYPES.WRITE});
     }catch(e){
       console.log("e.message")
       console.log(e.message)
@@ -106,7 +86,24 @@ router.post('/hyperdrive', async function (req, res) {
     }
   }
 
-  if(data.mode=='mkdir'){//make dir
+  if(data.api==API.DRIVETYPES.READ){ 
+    if(isEmpty(data.file)||isEmpty(data.dirname)){
+      return res.json({error:'file name empty'});
+    }
+    try{ 
+      let filepath = path.join(data.dirname,data.file)
+      filepath = filepath.replaceAll("\\" , "/");
+      const content = await drive.promises.readFile(filepath, 'utf-8')
+      return res.json({api:API.DRIVETYPES.READ,content:content});
+    }catch(e){
+      console.log("e.message")
+      console.log(e.message)
+      return res.json({error:e.message});
+    }
+  }
+
+
+  if(data.api==API.DRIVETYPES.MKDIR){//make dir
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
     if(isEmpty(data.dirname)){
       return res.json({error:'file name empty'});
@@ -123,7 +120,7 @@ router.post('/hyperdrive', async function (req, res) {
     return res.json({message:'createdir'});
   }
 
-  if(data.mode=='rmdir'){//remove dir
+  if(data.api== API.DRIVETYPES.RMDIR){//remove dir
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
     if(isEmpty(data.dirname)){
       return res.json({error:'dir name empty'});
@@ -132,14 +129,13 @@ router.post('/hyperdrive', async function (req, res) {
       await drive.promises.rmdir(data.dirname)
     }catch(e){
       console.log(e);
-      console.log("/////");
-      console.log(e.message)
+      //console.log(e.message)
       return res.json({error:e.message});
     }
     return res.json({message:'removedir'});
   }
 
-  if(data.mode=='ls'){
+  if(data.api== API.DRIVETYPES.LS){
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
     let list;
     if(isEmpty(data.dirname)){
@@ -154,44 +150,39 @@ router.post('/hyperdrive', async function (req, res) {
     return res.json({message:'list',list:list});
   }
 
-  if(data.mode=='drivekey'){
+  if(data.api== API.DRIVETYPES.GETKEY){
     //const content = await drive.promises.readFile('/'+data.file, 'utf-8')
     //await drive.key
-    return res.json({api:'drivekey',key:drive.key.toString('hex')});
+    return res.json({api:API.DRIVETYPES.DRIVEKEY,key:drive.key.toString('hex')});
   }
   //res.send(JSON.stringify({meesage:'test'}));
 })
 
-router.put('/hyperdrive', async function (req, res) {
-  //console.log(getHyperDrive())
-  //await getHyperClient();
-  const drive = await getHyperDrive();
-  await drive.promises.writeFile('/hello.txt', 'world')
-  //const data = await drive.promises.readFile('/hello.txt', 'utf-8')
-  res.json({meesage:'test'});
-})
 // https://hypercore-protocol.org/guides/walkthroughs/sharing-files-with-hyperdrive/
 router.delete('/hyperdrive', async function (req, res) {
   const drive = await getHyperDrive();
   let data = req.body;
-  //console.log('delete....')
+  console.log('delete',data)
   try{
-    let status = await drive.promises.unlink('/'+data.file);
-    console.log(status);
+    let filepath = path.join(data.dirname,data.file)
+    filepath = filepath.replaceAll("\\" , "/");
+    console.log("filepath:", filepath)
+    await drive.promises.unlink(filepath);
+    //let status = await drive.promises.unlink(filepath);
+    //let status = await drive.promises.unlink('/'+data.file);
+    //console.log("status:",status);
   }catch(e){
-    //console.log("e.......");
     console.log(e.message);
-    //console.log("e.......");
     return res.json({error:e.message});
   }
   
-  res.json({meesage:'delete'});
+  res.json({api:API.DELETE,filename:data.file});
 })
 
 router.post('/hyperdriveupload', upload.single('File'),async function (req, res) {
   
   const drive = await getHyperDrive();
-  console.log('test////')
+  console.log("uploading...")
   let {dirname} = req.body;
   if(!dirname){
     console.log('Error path dir')
@@ -200,20 +191,20 @@ router.post('/hyperdriveupload', upload.single('File'),async function (req, res)
   //console.log("dirname:",dirname)
   //console.log(req.body);
   //console.log(req.file);
-  //console.log('test////')
   //console.log(req.files);
-
   try{
     let filepath = path.join(dirname,req.file.originalname)
     filepath = filepath.replaceAll("\\" , "/");
-    await drive.promises.writeFile(filepath, req.file.buffer)
-    return res.json({message:'uploaded'});
+    console.log(req.file)
+    console.log(req.file.buffer)
+    await drive.promises.writeFile(filepath, req.file.buffer,'binary')
+    //await drive.promises.writeFile('/stuff/file2.bin', Buffer.from([0,1,2,4]))
+    return res.json({api:API.DRIVETYPES.UPLOADED});
   }catch(e){
     console.log(e.message)
     return res.json({error:e.message});
   }
 
-  return res.json({error:"error"});
 })
 
 var re = /(?:\.([^.]+))?$/;

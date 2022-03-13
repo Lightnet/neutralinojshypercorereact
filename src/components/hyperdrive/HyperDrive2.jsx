@@ -1,7 +1,6 @@
 /*
   LICENSE: MIT
   Created by: Lightnet
-
 */
 
 // https://github.com/neutralinojs/neutralinojs/blob/main/server/router.cpp
@@ -9,9 +8,10 @@
 // 
 
 import { Button, Classes } from "@blueprintjs/core";
-import React,{createRef, useEffect, useState} from "react";
+import React, { useEffect, useState} from "react";
 import { nanoid16 } from "../../lib/helper.mjs";
 import useAxiosTokenAPI from "../hook/useAxiosTokenAPI.jsx";
+import { API } from "../hypercore/API.mjs";
 import { useHyperCore } from "../hypercore/HyperCoreProvider.jsx";
 import Modal from "../modal/Modal.jsx";
 import HyperDriveTextEditor from "../texteditor/HyperDriveTextEditor.jsx";
@@ -40,16 +40,16 @@ var imageexts=[
 function checkTextExt(_filename){
   let ext = re.exec(_filename)[1];
   if(!ext){
-    console.log("NULL")
+    //console.log("NULL")
     return false;
   }else{
     ext = ext.toLowerCase();
   }
   if (textexts.indexOf(ext) < 0) {  // Wasn't found
-    console.log("NOT FOUND")
+    //console.log("NOT FOUND")
     return false;
   }else{// found
-    console.log("FOUND")
+    //console.log("FOUND")
     return true;
   }
 }
@@ -57,22 +57,23 @@ function checkTextExt(_filename){
 function checkImageExt(_filename){
   let ext = re.exec(_filename)[1];
   if(!ext){
-    console.log("NULL")
+    //console.log("NULL")
     return false;
   }else{
     ext = ext.toLowerCase();
   }
   if (imageexts.indexOf(ext) < 0) {  // Wasn't found
-    console.log("NOT FOUND")
+    //console.log("NOT FOUND")
     return false;
   }else{// found
-    console.log("FOUND")
+    //console.log("FOUND")
     return true;
   }
 }
 
 export default function HyperDrive2(){
 
+  //vm hard/ssd drives
   const [drive, setDrive] = useState('');// key drive default to local drive
   const [dirname, setDirName] = useState('/'); //default / dir for local drive
   const [dirList, setDirList] = useState([]);
@@ -81,18 +82,25 @@ export default function HyperDrive2(){
 
   const [toggleDrives, setToggleDrives] = useState(false)
   const [drives, setDrives] = useState([])
-
+  //modal
   const [showCreateDir, setShowCreateDir] = useState(false);
   const [showDeleteDir, setShowDeleteDir] = useState(false);
   const [showDeleteFile, setShowDeleteFile] = useState(false);
 
   const [view, setView] = useState("dir");
-
+  //text editor
   const [fileName, setFileName] = useState("");
   const [textContentEdit, setTextContentEdit] = useState("");
+  //upload file
+  const [fileUpload, setFileUpload] = useState(null);
+  const [isAbort, setIsAbort] = useState(false);
+  const [controller, setController] = useState(null);
+  const [status, setStatus] = useState("idle");
+  const [percent, setPercent] = useState(0);
+  //IMAGE
+  const [imageFile,setImageFile] = useState('');
 
-  const [fileUpload, setFileUpload] = useState("");
-
+  // api and url request
   const {API_URL} = useHyperCore();
   const [axiosJWT, isLoading] = useAxiosTokenAPI();
 
@@ -119,7 +127,7 @@ export default function HyperDrive2(){
           }
           if(data.list){
             setDirList(data.list);
-            //setViewType('dir');
+            //setView('dir');
           }
         }
       })
@@ -131,11 +139,11 @@ export default function HyperDrive2(){
     }
   }
 
-  //get dir
+  //get drive dir
   async function DriveDirList(name){
     axiosJWT.instance.post('/api/hyperdrive',{
         dirname:name
-      , mode:'dir'
+      , api: API.DRIVETYPES.DIR
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
@@ -149,6 +157,31 @@ export default function HyperDrive2(){
         }
         if(data.list){
           setDirList(data.list);
+        }
+      }
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  }
+
+  //GET DRIVE KEY LOCAL
+  async function getDrive(){
+    axiosJWT.instance.post('/api/hyperdrive',{
+      api:API.DRIVETYPES.GETKEY
+    })
+    .then(function (response) {
+      if((response.status==200)&&(response.statusText=="OK")){
+        //console.log(response.data)
+        let data = response.data;
+        console.log(data);
+        if(data.error){
+          console.log('Fetch Error get content data.')
+          return;
+        }
+        if(data.api== API.DRIVETYPES.DRIVEKEY){
+          setDrive(data.key);
+          return;
         }
       }
     })
@@ -173,49 +206,73 @@ export default function HyperDrive2(){
     DriveDirList(_dirname);
   }
 
-
-  // INPUTS
+  // UPLOAD SELECT
   function changeFileSelect(event){
-    setSelectedFile(event.target.files[0]);
+    setFileUpload(event.target.files[0]);
+    setStatus("Ready!")
   }
 
+  // UPLOAD ABORT BUTTON
+  function clickAbort(){
+    // cancel the request
+    if(controller){
+      controller.abort()
+      setIsAbort(false);
+    }
+  }
+
+  // UPLOAD FILE
   function clickUploadHandle(event){
     event.preventDefault();
     console.log('upload');
-    if(!selectedFile){
+    if(!fileUpload){
       console.log('EMPTY');
       return;
     }
+    setIsAbort(true);
+    const control = new AbortController();
+    setController(control);
+
     const formData = new FormData();
-    formData.append('File', selectedFile);
+    formData.append('File', fileUpload);
     formData.append('dirname', dirname);
     // need to check later for upload
     // https://stackoverflow.com/questions/43013858/how-to-post-a-file-from-a-form-with-axios
 
     axiosJWT.instance.post('/api/hyperdriveupload',formData,{
-      headers: {'Content-Type': 'multipart/form-data'}
+      signal: control.signal
+      , headers: {'Content-Type': 'multipart/form-data'}
+      , onUploadProgress: function(progressEvent) {
+        var percentCompleted = (progressEvent.loaded * 100) / progressEvent.total
+        //console.log(percentCompleted)
+        setPercent(percentCompleted);
+        setStatus(percentCompleted.toFixed(2)+"%")
+      }
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
-        //console.log(response.data)
         let data = response.data;
         console.log(data);
         if(data.error){
           console.log('axiosJWT Error!');
           return;
         }
-    
-        if(data.api=='uploaded'){
-          setViewType('dir');
+        if(data.api==API.DRIVETYPES.UPLOADED){
+          setView('dir');
+          getDriveDir();
+          setStatus("Finish")
         }
+        setIsAbort(false);
       }
     })
     .catch(function (error) {
       console.log(error);
+      setIsAbort(false);
+      setStatus(error.message)
     });
-
   }
 
+  // INPUTS
   function typeFileName(e){
     setFileName(e.target.value)
   }
@@ -228,6 +285,7 @@ export default function HyperDrive2(){
     setTmpDir(e.target.value);
   }
 
+  //MODAL
   function onOpenCreateDir(){
     setShowCreateDir(true)
   }
@@ -244,12 +302,7 @@ export default function HyperDrive2(){
     setShowDeleteFile(false)
   }
 
-
-
-
-
-
-  // RENDER
+  // RENDER DRIVE DIR BACK
   function renderDrives(){
     if(toggleDrives){
       return <>
@@ -259,7 +312,7 @@ export default function HyperDrive2(){
       </>
     }else{
       return <>
-        <Button icon="key" small > Get </Button>
+        <Button icon="key" small onClick={getDrive}> Get </Button>
         <input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={drive} onChange={(e)=>setDrive(e.target.value)} placeholder="Default local drive" />
       </>
     }
@@ -270,6 +323,12 @@ export default function HyperDrive2(){
     setView("texteditor")
   }
 
+  function clickUpload(){
+    setFileUpload(null)
+    setStatus("Idle")
+    setView("upload")
+  }
+
   function clickDir(){
     setView("dir")
   }
@@ -277,9 +336,10 @@ export default function HyperDrive2(){
   // LOAD TEXT FILE
   async function clickEdit(filename){
     axiosJWT.instance.post('/api/hyperdrive',{
-      dirname:dirname
+        dirname:dirname
       , file:filename
-      , mode:'edit'
+      , api:API.DRIVETYPES.READ
+      //, mode:'edit'
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
@@ -309,11 +369,10 @@ export default function HyperDrive2(){
       dirname:dirname
       , file:fileName
       , content:textContentEdit
-      , mode:'save'
+      , api:API.DRIVETYPES.WRITE
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
-        //console.log(response.data)
         let data = response.data;
         console.log(data);
         if(data.error){
@@ -337,12 +396,11 @@ export default function HyperDrive2(){
       data:{
         dirname:dirname
         , file:filename
-        , mode:'delete'
+        , api:API.DELETE
       }
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
-        //console.log(response.data)
         let data = response.data;
         console.log(data);
         if(data.error){
@@ -376,12 +434,11 @@ export default function HyperDrive2(){
     }
 
     axiosJWT.instance.post('/api/hyperdrive',{
-      dirname:dirpath
-      , mode:'mkdir'
+        dirname:dirpath
+      , api:API.DRIVETYPES.MKDIR
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
-        //console.log(response.data)
         let data = response.data;
         console.log(data);
         if(data.error){
@@ -407,12 +464,11 @@ export default function HyperDrive2(){
     }
 
     axiosJWT.instance.post('/api/hyperdrive',{
-      dirname:dirpath
-      , mode:'rmdir'
+        dirname:dirpath
+      , api:API.DRIVETYPES.RMDIR
     })
     .then(function (response) {
       if((response.status==200)&&(response.statusText=="OK")){
-        //console.log(response.data)
         let data = response.data;
         console.log(data);
         if(data.error){
@@ -426,33 +482,41 @@ export default function HyperDrive2(){
     .catch(function (error) {
       console.log(error);
     });
-
   }
 
+  // RENDER UP DIR PATH
   function renderDir(){
     if(view=="dir"){
-      if(dirname=="/"){
-        return <></>
+      let dirpath = dirname;
+      dirpath = dirpath.slice(0,dirpath.lastIndexOf("/"))
+      if(dirpath.lastIndexOf("/") == -1 ){
+        return <><label> / </label> <Button icon="folder-close" small onClick={()=>clickSetDir("/")}> Up Directory </Button><br/></>
       }else{
-        let dirpath = dirname;
-        dirpath = dirpath.slice(0,dirpath.lastIndexOf("/"))
-        //if(dirpath.lastIndexOf("/"))
-        //console.log(dirpath.lastIndexOf("/")==-1){
-        if(dirpath.lastIndexOf("/") == -1 ){
-          return <><label> / </label> <Button icon="folder-close" small onClick={()=>clickSetDir("/")}> Up Directory </Button><br/></>
-        }else{
-          return <>
-            <label> {dirpath} </label> <Button icon="folder-close" small onClick={()=>clickSetDir(dirpath)}> Up Directory </Button><br/>
-          </>
-        }
+        return <>
+          <label> {dirpath} </label> <Button icon="folder-close" small onClick={()=>clickSetDir(dirpath)}> Up Directory </Button><br/>
+        </>
       }
     }
     return <></>
   }
 
+  // IMAGE
+  function viewImage(_filename){
+    let tmpFile = _filename;
+    if(dirname == "/"){
+      tmpFile = API_URL+"/api/hyperdrive/" + tmpFile;
+    }else{
+      tmpFile = API_URL+"/api/hyperdrive" + dirname + "/" + tmpFile;
+    }
+
+    setImageFile(tmpFile);
+    setView('image');
+  }
+
+  //RENDER DIR, TEXT EDITOR, UPLOAD, IMAGE
   function renderView(){
     if(view=="dir"){
-      return dirList.map((item)=>{
+      return dirList.map((item,index)=>{
 
         var ext = re.exec(item)[1];
         //var ext = item.substr(item.lastIndexOf('.') + 1);
@@ -463,18 +527,29 @@ export default function HyperDrive2(){
         let bcd = <></>;
         let bimg = <></>;
         //bdowloadlink=<a href={"http://localhost/download"+dirname+"/"+item} target="_blank">Download</a>
-        console.log("NAME:",item);
+        //console.log("NAME:",item);
         checkTextExt(item);
         if(ext){
           if(checkTextExt(item)==true){
             bedit=<Button icon="edit" small onClick={()=>clickEdit(item)}>Edit</Button>
             //bdowload=<Button icon="download" small onClick={()=>clickDownload(item)}>Download</Button>
-            //bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
+            bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
             bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
-          }
-          if(checkImageExt(item)==true){
-            //bimg=<img src={"http://localhost/hyperdrive"+"/"+item} />
-            //bimg=<Button small onClick={()=>viewImage(item)}> View Image </Button>
+          }else if(checkImageExt(item)==true){
+            //let fileimage = API_URL+"/api/hyperdrive"+"/"+item;
+            //if(dirname == "/"){
+              //fileimage = API_URL+"/api/hyperdrive/"+item;
+            //}else{
+              //fileimage = API_URL+"/api/hyperdrive"+dirname+"/"+item;
+            //}
+            //console.log(fileimage);
+
+            //bimg=<img src={fileimage} />
+            bimg=<Button small icon="media" onClick={()=>viewImage(item)}> View Image </Button>
+            bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
+          }else{//if does not match other ext tupe added simple delete and download
+            bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
+            bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
           }
         }else{
           bcd = <>
@@ -485,7 +560,12 @@ export default function HyperDrive2(){
         
         //console.log("NAME:",item)
         //console.log(ext);
-        return <div key={item}>
+        let backcolor = "gray";
+        if(index % 2){
+          backcolor = "white";
+        }
+
+        return <div style={{background:backcolor}} key={item}>
             <label> {item}</label> {bimg} {bcd} {bdowloadlink} {bdowload} {bedit} {bdelete}
           </div>
       })
@@ -494,7 +574,12 @@ export default function HyperDrive2(){
         <label> File Name: </label>
         <input type="file" onChange={changeFileSelect} />
         <Button icon="upload" small onClick={clickUploadHandle}> Upload </Button>
-        <Button icon="cross" small onClick={clickDir}> Cancel </Button>
+        <label> Status: {status} </label>
+        {isAbort ? (
+          <Button icon="cross" small onClick={clickAbort}> Abort </Button>
+        ):(
+          <Button icon="cross" small onClick={clickDir}> Cancel </Button>
+        )}
       </>
     }else if(view=="texteditor"){
       return <> 
@@ -503,15 +588,18 @@ export default function HyperDrive2(){
         <Button small onClick={clickDir}> Cancel </Button>
         <HyperDriveTextEditor value={textContentEdit} onChange={typeTextContentEdit} />
         </>
-    }else if(viewType=='image'){
+    }else if(view=='image'){
+      //<Button small> Delete </Button> 
       return <>
-        <label> File Name:{imageFile} </label> <Button small> Delete </Button> <Button small onClick={clickEditCancel}> Cancel </Button> <br />
+        <label> File Name:{imageFile} </label> 
+        <Button small onClick={clickDir}> Cancel </Button> <br />
         <img src={imageFile} />
       </>
     }
     return <></>
   }
 
+  //RENDER ELEMENT
   return <>
     <div style={{
     width:"100%",
@@ -528,7 +616,7 @@ export default function HyperDrive2(){
         <input className={Classes.INPUT + " " + Classes.SMALL} size="64" value={dirname} onChange={(e)=>setDirName(e.target.value)} />
         <Button icon="folder-new" small onClick={onOpenCreateDir}> mkdir </Button>
         <Button icon="document" small onClick={clickNewDoc}> New Doc</Button>
-        <Button icon="upload" small> Upload </Button>
+        <Button icon="upload" small onClick={clickUpload}> Upload </Button>
       </div>
       <div style={{width:"100%",height:"calc(100% - 72px)"}}>
         {renderDir()}

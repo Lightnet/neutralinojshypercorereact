@@ -12,6 +12,7 @@
 - hypercore 9.12.0 Current used.
 - hypercore 9
   - replicate not working just test example.
+- upload and download binary data is not working just text file are working.
 
 # Information:
   Portable application for simple web hosting and file sharing. It only needs nodejs install to get those packages added and running.

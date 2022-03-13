@@ -16,6 +16,17 @@ import {AceEditorRef} from "./AceEditor.jsx";
 export default function HyperDriveTextEditor({value,onChange}){
 
   //const [fileName,setFileName] = useState('');
+  const [fontSize,setFontSize] = useState(24);
+  const [fontSizes,setFontSizes] = useState([
+      14
+    , 16
+    , 18
+    , 20
+    , 24
+    , 28
+    , 32
+    , 40
+  ]);
   const [mode, setMode] = useState("jsx");
   const [extLangs,setExtLangs] = useState([
       "jsx"
@@ -47,7 +58,6 @@ export default function HyperDriveTextEditor({value,onChange}){
   },[value])
 
   function onChangeContent(newValue){
-    //console.log(e.target.value)
     //console.log(newValue)
     setContent(newValue);
     if(onChange){
@@ -63,17 +73,14 @@ export default function HyperDriveTextEditor({value,onChange}){
       <div>
         <label> Mode: </label>
         <select value={mode} onChange={(e)=>setMode(e.target.value)}>
-          <option value={"jsx"}>jsx</option>
-          <option value={"json"}>json</option>
-          <option value={"javascript"}>javascript</option>
-          <option value={"html"}>html</option>
-          <option value={"css"}>css</option>
+          {extLangs.map(item=><option key={item} value={item}> {item} </option>) }
         </select>
         <label> Theme: </label>
         <select value={theme} onChange={(e)=>setTheme(e.target.value)}>
-          <option value={"terminal"}>terminal</option>
-          <option value={"twilight"}>twilight</option>
+          {selectThemes.map(item=><option key={item} value={item}> {item} </option>) }
         </select>
+        <label> Font Size: </label>
+        <input maxLength="4" size="4" type="number" value={fontSize} onChange={(e)=>setFontSize(Number(e.target.value))}/>
         <Button small onClick={(e)=>setShowPrintMargin(state=>!state)}>Print Margin {showPrintMargin ? ("x"):("o")}</Button>
         <Button small onClick={(e)=>setShowGutter(state=>!state)}>Gutter {showGutter ? ("x"):("o")}</Button>
         <Button small onClick={(e)=>setHighlightActiveLine(state=>!state)}> Highlight {highlightActiveLine ? ("x"):("o")}</Button>
@@ -83,6 +90,7 @@ export default function HyperDriveTextEditor({value,onChange}){
         ref={aceRef}
         height="calc(100% - 2px)"
         width="100%"
+        fontSize={fontSize}
         mode={mode}
         theme={theme}
         value={content}
