@@ -9,10 +9,8 @@
 - hypercore 10 upcoming and not used.
   - dev working the new build
   - 02.10.2022
-- hypercore 9.12.0 Current used.
-- hypercore 9
+- hypercore 9 ( Current )
   - replicate not working just test example.
-- upload and download binary data is not working just text file are working.
 
 # Information:
   Portable application for simple web hosting and file sharing. It only needs nodejs install to get those packages added and running.
@@ -66,22 +64,11 @@
 Home | HyperDrive | HyperBee | Text Editor |
 
 
-## HyperDrive:
-
-```
-Refresh (reload current dirname) | Create (not added) | Get (drive id) |
-New Text File | Upload | mkdir | rmdir | dir (createDirName full path)
-Directory | Input (dirname / Enter )
-
-Dir List Map
-
-```
-
 ### HypedDrive Urls:(work in progress)
 ```
-http://localhost/hyperdrive/filename.txt <-local drive
-http://localhost/hyperdrive/testfolder/filename.txt <-local drive with folder
-http://localhost/hyperdrive/000000.../filename.txt <- key drive with file
+http://localhost/api/hyperdrive/filename.txt <-local drive
+http://localhost/api/hyperdrive/testfolder/filename.txt <-local drive with folder
+http://localhost/api/hyperdrive/000000.../filename.txt <- key drive with file
 ```
   It need to check if there key or file that be loaded. One for access to local drive and other is key drive.
 

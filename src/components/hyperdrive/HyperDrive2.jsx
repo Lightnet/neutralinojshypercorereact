@@ -530,25 +530,23 @@ export default function HyperDrive2(){
         //console.log("NAME:",item);
         checkTextExt(item);
         if(ext){
+          let filepath = "";
+          if(dirname == "/"){
+            filepath = API_URL+"/api/download/"+item;
+          }else{
+            filepath = API_URL+"/api/download"+dirname+"/"+item;
+          }
           if(checkTextExt(item)==true){
             bedit=<Button icon="edit" small onClick={()=>clickEdit(item)}>Edit</Button>
             //bdowload=<Button icon="download" small onClick={()=>clickDownload(item)}>Download</Button>
-            bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
+            bdowloadlink=<a href={filepath} >Download</a>
             bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
           }else if(checkImageExt(item)==true){
-            //let fileimage = API_URL+"/api/hyperdrive"+"/"+item;
-            //if(dirname == "/"){
-              //fileimage = API_URL+"/api/hyperdrive/"+item;
-            //}else{
-              //fileimage = API_URL+"/api/hyperdrive"+dirname+"/"+item;
-            //}
-            //console.log(fileimage);
-
-            //bimg=<img src={fileimage} />
+            bdowloadlink=<a href={filepath} >Download</a>
             bimg=<Button small icon="media" onClick={()=>viewImage(item)}> View Image </Button>
             bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
           }else{//if does not match other ext tupe added simple delete and download
-            bdowloadlink=<a href={API_URL+"/api/download"+dirname+"/"+item} >Download</a>
+            bdowloadlink=<a href={filepath} >Download</a>
             bdelete=<Button icon="trash" small onClick={()=>clickDeleteFile(item)}> Delete </Button>
           }
         }else{
@@ -566,7 +564,7 @@ export default function HyperDrive2(){
         }
 
         return <div style={{background:backcolor}} key={item}>
-            <label> {item}</label> {bimg} {bcd} {bdowloadlink} {bdowload} {bedit} {bdelete}
+            <label> {item}</label> {bdowloadlink} {bdowload} {bimg} {bcd} {bedit} {bdelete}
           </div>
       })
     }else if(view=="upload"){

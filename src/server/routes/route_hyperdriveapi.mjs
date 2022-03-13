@@ -197,7 +197,7 @@ router.post('/hyperdriveupload', upload.single('File'),async function (req, res)
     filepath = filepath.replaceAll("\\" , "/");
     console.log(req.file)
     console.log(req.file.buffer)
-    await drive.promises.writeFile(filepath, req.file.buffer,'binary')
+    await drive.promises.writeFile(filepath, req.file.buffer)
     //await drive.promises.writeFile('/stuff/file2.bin', Buffer.from([0,1,2,4]))
     return res.json({api:API.DRIVETYPES.UPLOADED});
   }catch(e){
@@ -310,7 +310,8 @@ router.get('/download/*',async function (req, res) {
 
   if(ext){
     try{
-      const content = await drive.promises.readFile(req.params[0], 'utf-8')
+      //const content = await drive.promises.readFile(req.params[0], 'utf-8')
+      const content = await drive.promises.readFile(req.params[0])
       const filename = path.basename(req.params[0]);
       console.log(filename)
       res.setHeader('Content-disposition', 'attachment; filename=' + filename);
