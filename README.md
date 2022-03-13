@@ -13,9 +13,13 @@
   - replicate not working just test example.
 
 # Information:
-  Portable application for simple web hosting and file sharing. It only needs nodejs install to get those packages added and running.
+  Work in progress...
 
-  By using the react.js for UI design and fetch/request call url for data upload and download. Without need to refresh the page or reload them since those components is modular format. Work in progress.
+  HyperDrive is virtual drive folder that use network peer to peer sharing data. Current default to local virtual drive. All data is store in current project dir folder as "my-hyperdrive" in drive format data. User can script them.
+
+  By using the React.js for UI design and fetch/request call url for data upload and download. Without need to refresh the page or reload them since those components is modular format.
+
+  It can be portable application for web hosting user interface and file sharing. It only needs nodejs install to get those packages added and running.
 
   One is React.js is bundle single file for client browser. It save bandwidth in some degree.
 
