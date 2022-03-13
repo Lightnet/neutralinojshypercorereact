@@ -7,6 +7,7 @@ import {
   Link
 //, useNavigate
 } from "react-router-dom";
+import ThemeButton from "../theme/ThemeButton";
 
 export default function ViteNavBar(){
 
@@ -29,5 +30,6 @@ export default function ViteNavBar(){
         //console.log(name)
         return (<span key={path}> <Link to={path}> {name} </Link> | </span>)
       })}
+    <ThemeButton/>
   </div>
 }

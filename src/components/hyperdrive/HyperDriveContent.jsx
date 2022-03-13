@@ -371,7 +371,6 @@ export default function HyperDriveContent(){
     .catch(function (error) {
       console.log(error);
     });
-
   }
 
   async function clickRemoveDir(){
@@ -545,7 +544,6 @@ export default function HyperDriveContent(){
     .catch(function (error) {
       console.log(error);
     });
-
   }
 
   function clickChangeDir(_dirname){
